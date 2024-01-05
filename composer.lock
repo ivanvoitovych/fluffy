@@ -1,0 +1,208 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "This file is @generated automatically"
+    ],
+    "content-hash": "b3b0387d2bf4f7aee92ac619c669fcb2",
+    "packages": [
+        {
+            "name": "ivanvoitovych/dot-di",
+            "version": "v1.1.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/ivanvoitovych/dot-di.git",
+                "reference": "8db8ceb2a7624959ebe8867c27db05e07957c74c"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/ivanvoitovych/dot-di/zipball/8db8ceb2a7624959ebe8867c27db05e07957c74c",
+                "reference": "8db8ceb2a7624959ebe8867c27db05e07957c74c",
+                "shasum": ""
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "DotDi\\": "src/DotDi/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ivan Voitovych",
+                    "email": "col606v@gmail.com"
+                }
+            ],
+            "description": "DI and service provider for PHP. Inspired by .NET DI.",
+            "support": {
+                "issues": "https://github.com/ivanvoitovych/dot-di/issues",
+                "source": "https://github.com/ivanvoitovych/dot-di/tree/v1.1.2"
+            },
+            "time": "2023-05-12T09:37:14+00:00"
+        },
+        {
+            "name": "nikic/php-parser",
+            "version": "4.x-dev",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/nikic/PHP-Parser.git",
+                "reference": "1bcbb2179f97633e98bbbc87044ee2611c7d7999"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/nikic/PHP-Parser/zipball/1bcbb2179f97633e98bbbc87044ee2611c7d7999",
+                "reference": "1bcbb2179f97633e98bbbc87044ee2611c7d7999",
+                "shasum": ""
+            },
+            "require": {
+                "ext-tokenizer": "*",
+                "php": ">=7.0"
+            },
+            "require-dev": {
+                "ircmaxell/php-yacc": "^0.0.7",
+                "phpunit/phpunit": "^6.5 || ^7.0 || ^8.0 || ^9.0"
+            },
+            "bin": [
+                "bin/php-parse"
+            ],
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "4.9-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "PhpParser\\": "lib/PhpParser"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Nikita Popov"
+                }
+            ],
+            "description": "A PHP parser written in PHP",
+            "keywords": [
+                "parser",
+                "php"
+            ],
+            "support": {
+                "issues": "https://github.com/nikic/PHP-Parser/issues",
+                "source": "https://github.com/nikic/PHP-Parser/tree/4.x"
+            },
+            "time": "2023-12-10T21:03:43+00:00"
+        },
+        {
+            "name": "viewi/viewi",
+            "version": "v2.x-dev",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/viewi/viewi.git",
+                "reference": "8182201ba54aca4cb3260d762733bbc9b8fc36ef"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/viewi/viewi/zipball/8182201ba54aca4cb3260d762733bbc9b8fc36ef",
+                "reference": "8182201ba54aca4cb3260d762733bbc9b8fc36ef",
+                "shasum": ""
+            },
+            "require": {
+                "ext-ctype": "*",
+                "ext-curl": "*",
+                "ext-json": "*",
+                "ext-zlib": "*",
+                "nikic/php-parser": "^4.16",
+                "php": "^8.0"
+            },
+            "require-dev": {
+                "codeception/codeception": "^5.0",
+                "codeception/module-asserts": "*",
+                "codeception/module-phpbrowser": "*"
+            },
+            "default-branch": true,
+            "bin": [
+                "bin/viewi"
+            ],
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Viewi\\": "src/Viewi/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ivan Voitovych",
+                    "email": "col606v@gmail.com"
+                }
+            ],
+            "description": "Powerful tool for building progressive and completely reactive web applications",
+            "keywords": [
+                "reactive",
+                "template",
+                "ui",
+                "viewi"
+            ],
+            "support": {
+                "issues": "https://github.com/viewi/viewi/issues",
+                "source": "https://github.com/viewi/viewi/tree/v2.0.2"
+            },
+            "time": "2024-01-01T14:04:38+00:00"
+        }
+    ],
+    "packages-dev": [
+        {
+            "name": "swoole/ide-helper",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/swoole/ide-helper.git",
+                "reference": "d246e7c7d4a9fd8baa806723759fe4e73148caed"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/swoole/ide-helper/zipball/d246e7c7d4a9fd8baa806723759fe4e73148caed",
+                "reference": "d246e7c7d4a9fd8baa806723759fe4e73148caed",
+                "shasum": ""
+            },
+            "default-branch": true,
+            "type": "library",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "Team Swoole",
+                    "email": "team@swoole.com"
+                }
+            ],
+            "description": "IDE help files for Swoole.",
+            "support": {
+                "issues": "https://github.com/swoole/ide-helper/issues",
+                "source": "https://github.com/swoole/ide-helper/tree/master"
+            },
+            "time": "2023-12-11T08:01:25+00:00"
+        }
+    ],
+    "aliases": [],
+    "minimum-stability": "dev",
+    "stability-flags": {
+        "swoole/ide-helper": 20
+    },
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": [],
+    "platform-dev": [],
+    "plugin-api-version": "2.2.0"
+}

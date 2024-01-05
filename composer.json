@@ -9,5 +9,16 @@
         }
     ],
     "minimum-stability": "dev",
-    "require": {}
+    "autoload": {
+        "psr-4": {
+            "Fluffy\\": "fluffy/"
+        }
+    },
+    "require": {
+        "ivanvoitovych/dot-di": "~1.0",
+        "viewi/viewi": "^2.0"
+    },
+    "require-dev": {
+        "swoole/ide-helper": "dev-master"
+    }
 }
