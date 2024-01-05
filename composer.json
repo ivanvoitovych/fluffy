@@ -1,0 +1,13 @@
+{
+    "name": "ivanvoitovych/fluffy",
+    "description": "Fluffy framework. Based on Viewi and Swoole.",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Ivan Voitovych",
+            "email": "col606v@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {}
+}
