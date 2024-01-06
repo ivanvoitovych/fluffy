@@ -1,4 +1,4 @@
 #!/usr/bin/env php
 <?php
 
-include __DIR__ . '/vendor/ivanvoitovych/fluffy/php fluffy';
+include __DIR__ . '/vendor/ivanvoitovych/fluffy/bin/start';
