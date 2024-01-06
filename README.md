@@ -8,47 +8,47 @@ Not ready for production.
 
 ### Run server
 
-`bin/start server`
+`php fluffy server`
 
 ### Reload server
 
-`bin/start reload`
+`php fluffy reload`
 
 ### Watch mode - runs server and rebuilds application on file changes
 
-`bin/start watch`
+`php fluffy watch`
 
 ### Build - builds the app
 
-`bin/start build [environment]`
+`php fluffy build [environment]`
 
 For example:
 
-`bin/start build dev`
+`php fluffy build dev`
 
-`bin/start build prod`
+`php fluffy build prod`
 
-`bin/start build local`
+`php fluffy build local`
 
 ### Install (create all tables)
 
-`bin/start install`
+`php fluffy install`
 
 ### Run migrations
 
-`bin/start migrate`
+`php fluffy migrate`
 
 ### Create Entity model
 
-`bin/start model create EntityName [Namespace]`
+`php fluffy model create EntityName [Namespace]`
 
 Example:
 
-`bin/start model create UserTokenEntity Auth`
+`php fluffy model create UserTokenEntity Auth`
 
 ### Generate Entity model repository, migration, service; register migration, repository, service
 
-`bin/start model build UserTokenEntity Auth`
+`php fluffy model build UserTokenEntity Auth`
 
 ### Cron Tab
 

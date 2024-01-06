@@ -1,0 +1,2 @@
+$this->runMigration(EntityBaseNameMigration::class);
+        

@@ -1,0 +1,101 @@
+#!/usr/bin/env php
+<?php
+
+use Application\App;
+use Application\StartUp;
+
+use function Swoole\Coroutine\run;
+
+$currentDir = getcwd();
+
+$inputs = array_slice($argv, 1);
+
+if (count($inputs) == 0) {
+    die('[start] Too few parameters, expected command: watch, build, start, migrate, etc.' . PHP_EOL);
+}
+
+$configDir = realpath($currentDir . '/configs');
+$params = array_slice($inputs, 1);
+
+switch ($inputs[0]) {
+    case 'watch': {
+            require __DIR__ . '/Watcher.php';
+            $config = require $configDir . '/watchConfig.php';
+            $watcher = new Watcher($currentDir, $params, $config);
+            $watcher->start();
+            break;
+        }
+    case 'server': {
+            require __DIR__ . '/server.php';
+            break;
+        }
+    case 'reload': {
+            $pid = @file_get_contents($currentDir . '/server.pid');
+            if ($pid) {
+                $restartAll = "kill -USR1 $pid";
+                $restartTasks = "kill -USR2 $pid";
+                $sendShutDown = "kill -15 $pid";
+                $kill = "kill -9 $pid";
+
+                $command = $restartAll;
+                echo $command . PHP_EOL;
+                echo shell_exec($command);
+            }
+            break;
+        }
+    case 'build': {
+            // vendor autoload
+            require $currentDir . '/vendor/autoload.php';
+            require __DIR__ . '/Builder.php';
+            $config = require $configDir . '/build.env.php';
+            (new Builder($currentDir, $params, $config))->build();
+            break;
+        }
+    case 'migrate': {
+            // vendor autoload
+            require $currentDir . '/vendor/autoload.php';
+            run(function () {
+                $app = new App(new StartUp([]));
+                $app->runMigrations();
+            });
+            break;
+        }
+    case 'install': {
+            // vendor autoload
+            require $currentDir . '/vendor/autoload.php';
+            run(function () {
+                $app = new App(new StartUp([]));
+                $app->install();
+            });
+            break;
+        }
+    case 'deploy': {
+            // vendor autoload
+            // require $currentDir . '/vendor/autoload.php';
+            // run(function () {
+            //     $app = new App(new StartUp());
+            //     $serviceProvider = $app->getProvider();
+            //     $this->startUp->configureInstallDependencies($this->serviceProvider);
+            //     // create scope
+            //     $scope = $serviceProvider->createScope();
+            //     try {
+            //         // create request and http context
+            //         /** @var MigrationsContext $migrationsContext */
+            //         $migrationsContext = $serviceProvider->get(MigrationsContext::class);
+            //         $migrationsContext->run();
+            //     } finally {
+            //         $scope->dispose();
+            //     }
+            // });
+            break;
+        }
+    case 'model': {
+            // vendor autoload
+            require $currentDir . '/vendor/autoload.php';
+            require __DIR__ . '/ModelBuilder.php';
+            (new ModelBuilder($currentDir, $params))->build();
+            break;
+        }
+    default:
+        die("[start] Unrecognizable command '{$inputs[0]}'" . PHP_EOL);
+}

@@ -1,0 +1,2 @@
+$serviceProvider->addScoped(EntityBaseNameRepository::class);
+        
