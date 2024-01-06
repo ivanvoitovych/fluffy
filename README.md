@@ -30,6 +30,10 @@ For example:
 
 `bin/start build local`
 
+### Install (create all tables)
+
+`bin/start install`
+
 ### Run migrations
 
 `bin/start migrate`
