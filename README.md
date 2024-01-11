@@ -6,6 +6,10 @@ Not ready for production.
 
 ## Commands
 
+### Set up Nginx on WSL
+
+`php fluffy nginx nutrition.wsl.com`
+
 ### Run server
 
 `php fluffy server`
