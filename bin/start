@@ -96,6 +96,14 @@ switch ($inputs[0]) {
             (new ModelBuilder($currentDir, $params))->build();
             break;
         }
+    case 'nginx': {
+            // vendor autoload
+            require $currentDir . '/vendor/autoload.php';
+            require __DIR__ . '/NginxBuilder.php';
+            $config = require $configDir . '/serverConfig.php';
+            (new NginxBuilder($currentDir, $params, $config))->build();
+            break;
+        }
     default:
         die("[start] Unrecognizable command '{$inputs[0]}'" . PHP_EOL);
 }
