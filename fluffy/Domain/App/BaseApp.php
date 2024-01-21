@@ -51,7 +51,7 @@ abstract class BaseApp
         $scope = $this->serviceProvider->createScope();
         try {
             // create request and http context
-            /** @var MigrationsContext $migrationsContext */
+            /** @var BaseMigrationsContext $migrationsContext */
             $migrationsContext = $scope->serviceProvider->get(BaseMigrationsContext::class);
             $migrationsContext->run();
         } finally {

@@ -24,6 +24,8 @@ class InstallMigration extends BaseMigration
     public function runUp()
     {
         if (!$this->MigrationHistoryRepository->tableExist()) {
+            // Needs super user
+            // $this->MigrationHistoryRepository->executeSQL('CREATE EXTENSION citext');
             $created = $this->MigrationHistoryRepository->createTable();
             if ($created) {
                 echo "[Install] Installation has been completed. " . PHP_EOL;

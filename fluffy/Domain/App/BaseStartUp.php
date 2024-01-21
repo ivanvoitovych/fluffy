@@ -102,6 +102,6 @@ class BaseStartUp implements IStartUp
      */
     function buildDependencies()
     {
-        $this->viewiApp->build();
+        echo $this->viewiApp->build();
     }
 }

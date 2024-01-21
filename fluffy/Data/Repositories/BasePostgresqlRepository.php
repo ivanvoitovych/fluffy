@@ -386,4 +386,15 @@ class BasePostgresqlRepository
         $arr = $stmt->fetchAssoc();
         return $arr['exists'];
     }
+
+    public function executeSQL(string $sqlScript)
+    {
+        $pg = $this->connector->get();
+        $stmt = $pg->query($sqlScript);
+        if (!$stmt) {
+            throw new RuntimeException("{$pg->error} {$pg->errCode}");
+        }
+        $arr = $stmt->fetchAssoc();
+        return $arr;
+    }
 }
