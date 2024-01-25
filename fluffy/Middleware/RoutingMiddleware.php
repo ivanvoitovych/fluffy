@@ -7,6 +7,7 @@ use Fluffy\Domain\Middleware\IMiddleware;
 use DotDi\DependencyInjection\Container;
 use DotDi\DependencyInjection\ServiceProviderHelper;
 use Exception;
+use Fluffy\Data\Mapper\IMapper;
 use ReflectionMethod;
 use Viewi\App;
 use Viewi\Common\JsonMapper;
@@ -17,7 +18,7 @@ use Viewi\Router\Router;
 
 class RoutingMiddleware implements IMiddleware
 {
-    public function __construct(private HttpContext $httpContext, private Container $container, private Router $router)
+    public function __construct(private HttpContext $httpContext, private Container $container, private Router $router, private IMapper $mapper)
     {
     }
 
@@ -67,7 +68,7 @@ class RoutingMiddleware implements IMiddleware
                         if (class_exists($typeName)) {
                             $argumentValue = $this->container->serviceProvider->get($typeName);
                             if ($argumentValue === null && $stdObject !== null) {
-                                $argumentValue = JsonMapper::Instantiate($typeName, $stdObject);
+                                $argumentValue = $this->mapper->map($typeName, $stdObject);
                                 $stdObject = null;
                             }
                             // print_r([$argumentValue, $typeName]);

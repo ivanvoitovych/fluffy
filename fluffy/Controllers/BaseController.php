@@ -2,8 +2,6 @@
 
 namespace Fluffy\Controllers;
 
-use Viewi\WebComponents\Response;
-
 class BaseController
 {
     public function Unauthorized(?string $message = null)
