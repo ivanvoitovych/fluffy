@@ -8,9 +8,9 @@ use DotDi\DependencyInjection\Container;
 use DotDi\DependencyInjection\ServiceProviderHelper;
 use Exception;
 use Fluffy\Data\Mapper\IMapper;
+use Fluffy\Domain\Message\ResponseBuilder;
 use ReflectionMethod;
 use Viewi\App;
-use Viewi\Common\JsonMapper;
 use Viewi\Components\Http\Message\Request;
 use Viewi\Components\Http\Message\Response;
 use Viewi\Router\ComponentRoute;
@@ -18,13 +18,22 @@ use Viewi\Router\Router;
 
 class RoutingMiddleware implements IMiddleware
 {
-    public function __construct(private HttpContext $httpContext, private Container $container, private Router $router, private IMapper $mapper)
+    private static Router $router;
+    private static IMapper $mapper;
+
+    public function __construct(private HttpContext $httpContext, private Container $container)
     {
+    }
+
+    public static function setUpStatic(Router $router, IMapper $mapper)
+    {
+        self::$router = $router;
+        self::$mapper = $mapper;
     }
 
     public function invoke()
     {
-        $match = $this->router->resolve($this->httpContext->request->uri, $this->httpContext->request->method);
+        $match = self::$router->resolve($this->httpContext->request->uri, $this->httpContext->request->method);
         if ($match === null) {
             throw new Exception('No route was matched!');
         }
@@ -68,7 +77,7 @@ class RoutingMiddleware implements IMiddleware
                         if (class_exists($typeName)) {
                             $argumentValue = $this->container->serviceProvider->get($typeName);
                             if ($argumentValue === null && $stdObject !== null) {
-                                $argumentValue = $this->mapper->map($typeName, $stdObject);
+                                $argumentValue = self::$mapper->map($typeName, $stdObject);
                                 $stdObject = null;
                             }
                             // print_r([$argumentValue, $typeName]);
@@ -110,16 +119,16 @@ class RoutingMiddleware implements IMiddleware
                 $this->httpContext->response->headers[$name] = $value;
             }
             $this->httpContext->response->body = is_string($response->body) ? $response->body : json_encode($response->body);
-        } else if ($response instanceof RawResponse) {
-            $this->httpContext->response->status = $response->StatusCode;
-            foreach ($response->Headers as $name => $value) {
+        } else if ($response instanceof ResponseBuilder) {
+            $this->httpContext->response->status = $response->statusCode;
+            foreach ($response->headers as $name => $value) {
                 $this->httpContext->response->headers[$name] = $value;
             }
-            if ($response->Stringify) {
-                $this->httpContext->response->rawData = $response->Content;
-                $this->httpContext->response->body = json_encode($response->Content);
+            if ($response->stringify) {
+                $this->httpContext->response->rawData = $response->body;
+                $this->httpContext->response->body = json_encode($response->body);
             } else {
-                $this->httpContext->response->body = $response->Content;
+                $this->httpContext->response->body = $response->body;
             }
         } else { // json
             $this->httpContext->response->headers['Content-Type'] = "application/json; charset=utf-8";
