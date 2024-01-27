@@ -85,7 +85,6 @@ abstract class BaseApp
      */
     function getProvider(): IServiceProvider
     {
-        $this->setUp();
         return $this->serviceProvider;
     }
 
