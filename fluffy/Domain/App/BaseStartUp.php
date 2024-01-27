@@ -92,6 +92,9 @@ class BaseStartUp implements IStartUp
     {
         // routes handler
         $app->use(RoutingMiddleware::class);
+        $serviceProvider = $app->getProvider();
+        [$router, $mapper] = [$serviceProvider->get(\Viewi\Router\Router::class), $serviceProvider->get(IMapper::class)];
+        RoutingMiddleware::setUpStatic($router, $mapper);
     }
 
     /**
