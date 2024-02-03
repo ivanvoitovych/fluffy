@@ -30,6 +30,10 @@ use Throwable;
 use Fluffy\Data\Repositories\UserTokenRepository;
 use Fluffy\Data\Repositories\UserVerificationCodeRepository;
 use Fluffy\Domain\App\IStartUp;
+use Fluffy\Domain\Viewi\ViewiFluffyBridge;
+use Viewi\App;
+use Viewi\Bridge\IViewiBridge;
+use Viewi\Engine;
 
 /** @namespaces **/
 // !Do not delete the line above!
@@ -95,6 +99,15 @@ class BaseStartUp implements IStartUp
         $serviceProvider = $app->getProvider();
         [$router, $mapper] = [$serviceProvider->get(\Viewi\Router\Router::class), $serviceProvider->get(IMapper::class)];
         RoutingMiddleware::setUpStatic($router, $mapper);
+        // Viewi bridge
+        /**
+         * @var App $viewiApp
+         */
+        $viewiApp = $serviceProvider->get(App::class);
+        $bridge = new ViewiFluffyBridge($serviceProvider);
+        $viewiApp->factory()->add(IViewiBridge::class, static function (Engine $engine) use ($bridge) {
+            return $bridge;
+        });
     }
 
     /**
