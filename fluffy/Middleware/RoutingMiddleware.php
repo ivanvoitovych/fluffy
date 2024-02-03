@@ -98,8 +98,13 @@ class RoutingMiddleware implements IMiddleware
             $response = $instance->$method(...$inputs);
         } elseif ($action instanceof ComponentRoute) {
             $request = new Request($this->httpContext->request->uri, $this->httpContext->request->method);
+            /**
+             * @var App $viewiApp
+             */
             $viewiApp = $this->container->serviceProvider->get(App::class);
-            $response = $viewiApp->engine()->render($action->component, $match['params'], $request);
+            $engine = $viewiApp->engine();
+            $engine->set(Container::class, $this->container);
+            $response = $engine->render($action->component, $match['params'], $request);
         } elseif (is_callable($action)) {
             // TODO: match params by name
             $dependencies = ServiceProviderHelper::getDependencies($action, $this->container->serviceProvider, $match['params'] + $params);
