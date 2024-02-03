@@ -79,13 +79,13 @@ class AppServer
         $this->server->on('finish', [$this, 'onFinish']);
         $this->server->on('pipeMessage', [$this, 'onPipeMessage']);
 
-        $this->server->on('BeforeReload', function ($serv) {
+        $this->server->on('BeforeReload', function ($server) {
             echo "[Server] Reloading..\n";
             // file_put_contents($this->config['BASE_DIR'] . '/reload.run', '1');
             // var_dump(get_included_files());
         });
 
-        $this->server->on('AfterReload', function ($serv) {
+        $this->server->on('AfterReload', function ($server) {
             echo "[Server] Reloaded\n";
             // unlink($this->config['BASE_DIR'] . '/reload.run');
             // var_dump(get_included_files());
