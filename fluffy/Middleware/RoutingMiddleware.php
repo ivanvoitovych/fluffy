@@ -14,6 +14,7 @@ use Viewi\App;
 use Viewi\Components\Http\Message\Request;
 use Viewi\Components\Http\Message\Response;
 use Viewi\Router\ComponentRoute;
+use Viewi\Router\RouteItem;
 use Viewi\Router\Router;
 
 class RoutingMiddleware implements IMiddleware
@@ -105,6 +106,9 @@ class RoutingMiddleware implements IMiddleware
             $engine = $viewiApp->engine();
             $engine->set(Container::class, $this->container);
             $response = $engine->render($action->component, $match['params'], $request);
+            if ($routeItem->transformCallback !== null) {
+                $response = ($routeItem->transformCallback)($response);
+            }
         } elseif (is_callable($action)) {
             // TODO: match params by name
             $dependencies = ServiceProviderHelper::getDependencies($action, $this->container->serviceProvider, $match['params'] + $params);
@@ -115,6 +119,7 @@ class RoutingMiddleware implements IMiddleware
             $instance = new $action();
             $response = $instance($match['params']);
         }
+
         if (is_string($response)) { // html
             $this->httpContext->response->headers['Content-Type'] = "text/html; charset=utf-8";
             $this->httpContext->response->body = $response;
