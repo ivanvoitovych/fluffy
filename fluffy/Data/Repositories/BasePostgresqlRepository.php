@@ -29,15 +29,49 @@ class BasePostgresqlRepository
         return $timeOfDay['sec'] * 1000000 + $timeOfDay['usec'];
     }
 
+    public function getList(
+        int $page = 1,
+        ?int $size = 10,
+        ?string $ordering = BaseEntityMap::PROPERTY_CreatedOn,
+        int $order = 1, // -1 DESC
+    ) {
+        $pg = $this->connector->get();
+
+        $select = '';
+        $comma = '';
+        foreach ($this->entityMap::Columns() as $property => $_) {
+            $select .= "$comma\"{$property}\"";
+            $comma = ', ';
+        }
+        $orderBy = $ordering !== null ? ("ORDER BY \"$ordering\"" . ($order > 0 ? " ASC" : " DESC")) : '';
+        $limit = '';
+        if ($size !== null) {
+            $offset = ($page - 1) * $size;
+            $limit = "LIMIT $size OFFSET $offset";
+        }
+        $sql = "SELECT $select FROM {$this->entityMap::$Schema}.\"{$this->entityMap::$Table}\" $orderBy $limit";
+        $stmt = $pg->query($sql);
+        if (!$stmt) {
+            throw new RuntimeException("{$pg->error} {$pg->errCode}");
+        }
+        $arr = $stmt->fetchAll(SW_PGSQL_ASSOC);
+        $list = $arr ? array_map(fn ($row) => $row ? $this->mapper->mapAssoc($this->entityType, $row) : null, $arr) : [];
+        $countSql = "SELECT COUNT(*) as \"count\" FROM {$this->entityMap::$Schema}.\"{$this->entityMap::$Table}\"";
+        $stmt = $pg->query($countSql);
+        if (!$stmt) {
+            throw new RuntimeException("{$pg->error} {$pg->errCode}");
+        }
+        $arr = $stmt->fetchAssoc();
+        $count = $arr['count'];
+        return ['list' => $list, 'total' => $count];
+    }
+
     public function getById($Id)
     {
         $pg = $this->connector->get();
 
         $select = '';
         $comma = '';
-        // var_dump($emptyEntity);
-        // $emptyEntity->me;
-        // var_dump($emptyEntity);
         foreach ($this->entityMap::Columns() as $property => $_) {
             $select .= "$comma\"{$property}\"";
             $comma = ', ';
@@ -46,23 +80,13 @@ class BasePostgresqlRepository
         $primaryKeyCondition = "\"{$keyName}\" = $Id";
 
         $sql = "SELECT $select FROM {$this->entityMap::$Schema}.\"{$this->entityMap::$Table}\" WHERE $primaryKeyCondition";
-        // echo $sql . PHP_EOL;
         $stmt = $pg->query($sql);
         if (!$stmt) {
             throw new RuntimeException("{$pg->error} {$pg->errCode}");
         }
-        // $entity = $stmt->fetchAssoc();
-        // var_dump($entity);
-        // return $entity;
-        // echo $sql . PHP_EOL;
-        // $stmt->execute([$Id]);
         $arr = $stmt->fetchAssoc();
-        // return $arr[0];
-        // var_dump($arr);
         $entity = $arr ? $this->mapper->mapAssoc($this->entityType, $arr) : null;
-        // var_dump($entity);
         return $entity;
-        //  to_timestamp("UpdatedOn" / 1000000) as "UpdatedOnDate"
     }
 
     public function find(string $findKey, $value)
