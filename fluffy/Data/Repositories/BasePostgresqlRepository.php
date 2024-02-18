@@ -66,7 +66,7 @@ class BasePostgresqlRepository
         return ['list' => $list, 'total' => $count];
     }
 
-    public function getById($Id)
+    public function getById($Id): ?BaseEntity
     {
         $pg = $this->connector->get();
 
@@ -126,7 +126,7 @@ class BasePostgresqlRepository
                 $value = $entity->{$property};
                 if (is_bool($entity->{$property})) {
                     $value = $entity->{$property} ? 'true' : 'false';
-                } else if ($entity->{$property} == null) {
+                } else if ($entity->{$property} === null) {
                     $value = 'NULL';
                 } else if (is_integer($entity->{$property})) {
                     $value = $entity->{$property};
@@ -175,7 +175,7 @@ class BasePostgresqlRepository
                 $value = $entity->{$property};
                 if (is_bool($entity->{$property})) {
                     $value = $entity->{$property} ? 'true' : 'false';
-                } else if ($entity->{$property} == null) {
+                } else if ($entity->{$property} === null) {
                     $value = 'NULL';
                 } else if (is_integer($entity->{$property})) {
                     $value = $entity->{$property};
@@ -243,6 +243,44 @@ class BasePostgresqlRepository
         // $arr = $stmt->fetchAssoc();
         return true;
     }
+
+    public function addColumns(array $columnsSchema)
+    {
+        $tableName = $this->entityMap::$Table;
+        $schema = $this->entityMap::$Schema;
+        $columns = '';
+        $comma = '';
+        $pg = $this->connector->get();
+        foreach ($columnsSchema as $property => $columnMeta) {
+            $dataType = $columnMeta['type'];
+            if (isset($columnMeta['length'])) {
+                $dataType .= "({$columnMeta['length']})";
+            }
+            if (isset($columnMeta['null']) && $columnMeta['null'] === false) {
+                $dataType .= " NOT NULL";
+            }
+            if (isset($columnMeta['default'])) {
+                $dataType .= " DEFAULT " . $columnMeta['default'];
+            }
+            if (isset($columnMeta['autoIncrement'])) {
+                $dataType .= " GENERATED ALWAYS AS IDENTITY";
+            }
+            $columns .= "{$comma}ADD COLUMN \"{$property}\" $dataType";
+            $comma = ',' . PHP_EOL;
+        }
+        $sql = <<<EOD
+        ALTER TABLE $schema."$tableName"
+        $columns;
+        EOD;
+
+        $stmt = $pg->query($sql);
+        if (!$stmt) {
+            throw new RuntimeException("{$pg->error} {$pg->errCode}");
+        }
+        // $arr = $stmt->fetchAssoc();
+        return true;
+    }
+
     /**
      * 
      * @return bool true if table created, false if already exists
