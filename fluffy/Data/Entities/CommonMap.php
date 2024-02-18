@@ -74,9 +74,19 @@ class CommonMap
         'length' => 400,
         'null' => false,
     ];
+
     public static array $Boolean = [
         'type' => 'boolean',
         'default' => 'false',
         'null' => false,
     ];
+
+    public static function VarChar(int $length, bool $null = false)
+    {
+        return [
+            'type' => 'character varying',
+            'length' => $length,
+            'null' => $null,
+        ];
+    }
 }
