@@ -26,6 +26,7 @@ $appServer->run();
 
 // Get processes list:
 // ps -ef
+// sudo kill -9 PID
 
 // ab -n 1000000 -c 100 -k http://127.0.0.1:8086/
 // ab -n 1000000 -c 100 -k http://127.0.0.1:8086/api/authorization/session
