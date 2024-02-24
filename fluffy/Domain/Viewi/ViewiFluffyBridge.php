@@ -10,6 +10,7 @@ use Fluffy\Domain\Message\HttpResponse;
 use Fluffy\Middleware\RoutingMiddleware;
 use Viewi\Bridge\DefaultBridge;
 use Viewi\Components\Http\Message\Request;
+use Viewi\Components\Http\Message\Response;
 use Viewi\Engine;
 
 class ViewiFluffyBridge extends DefaultBridge
@@ -34,11 +35,15 @@ class ViewiFluffyBridge extends DefaultBridge
         $cookies = $currentHttpContext->request->getCookie();
         $headers = $currentHttpContext->request->getHeader();
         $parts = parse_url($request->url);
+        $query = [];
+        if (isset($parts['query'])) {
+            parse_str($parts['query'], $query);
+        }
         $newRequest = new ViewiHttpRequest(
             $request->method,
             $parts['path'],
             $request->headers,
-            $parts['query'] ?? []
+            $query
         );
         $newRequest->cookie = $cookies; // copy cookie from parent
         $newRequest->header = $headers; // copy headers from parent
@@ -57,7 +62,10 @@ class ViewiFluffyBridge extends DefaultBridge
             // invoke
             $routingMiddleware = new RoutingMiddleware($httpContext, $scope);
             $routingMiddleware->invoke();
-            return $httpResponse->rawData;
+            if ($httpResponse->status >= 200 && $httpResponse->status < 300) {
+                return $httpResponse->rawData;
+            }
+            return new Response($request->url, $httpResponse->status, '', $httpResponse->headers, $httpResponse->rawData);
         } finally {
             // dispose scope
             // unset($requestDelegate);
