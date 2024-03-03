@@ -54,9 +54,23 @@ switch ($inputs[0]) {
     case 'migrate': {
             // vendor autoload
             require $currentDir . '/vendor/autoload.php';
-            run(function () {
-                $app = new App(new StartUp([]));
-                $app->runMigrations();
+            run(function () use ($params) {
+                $command = $params[0] ?? 'migrate';
+                switch ($command) {
+                    case 'migrate': {
+                            $app = new App(new StartUp());
+                            $app->runMigrations();
+                            break;
+                        }
+                    case 'rollback': {
+                            $migration = $params[1] ?? throw new Exception("Migration name was not provided.");
+                            $app = new App(new StartUp());
+                            $app->rollbackMigration($migration);
+                            break;
+                        }
+                    default:
+                        throw new Exception("Command '$command' is not supported.");
+                }
             });
             break;
         }
@@ -64,7 +78,7 @@ switch ($inputs[0]) {
             // vendor autoload
             require $currentDir . '/vendor/autoload.php';
             run(function () {
-                $app = new App(new StartUp([]));
+                $app = new App(new StartUp());
                 $app->install();
             });
             break;

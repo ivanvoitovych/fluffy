@@ -30,4 +30,11 @@ class BaseMigrationsContext
         $migration = $this->container->serviceProvider->get($type);
         $migration->runUp();
     }
+
+    public function rollback(string $type)
+    {
+        /** @var BaseMigration $migration */
+        $migration = $this->container->serviceProvider->get($type);
+        $migration->runDown();
+    }
 }

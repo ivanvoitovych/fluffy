@@ -41,6 +41,24 @@ abstract class BaseMigration
         }
     }
 
+    public function runDown()
+    {
+        $name = $this->migrationName();
+        if ($this->isMigrated($name)) {
+            echo "Rolling back migration $name.." . PHP_EOL;
+            try {
+                $this->down();
+                $this->cleanUpMigration($name);
+            } catch (Throwable $t) {
+                echo "Failed. Rolling back migration $name.." . PHP_EOL;
+                throw $t;
+            }
+            echo "Rolling back $name completed" . PHP_EOL;
+        } else {
+            echo "There is no $name migration" . PHP_EOL;
+        }
+    }
+
     public function isMigrated(string $key): bool
     {
         return $this->MigrationHistoryRepository->find('Key', $key) !== null;
@@ -55,5 +73,13 @@ abstract class BaseMigration
         $migration = new MigrationHistoryEntity();
         $migration->Key = $key;
         $this->MigrationHistoryRepository->Create($migration);
+    }
+
+    public function cleanUpMigration(string $key)
+    {
+        $migration = $this->MigrationHistoryRepository->find('Key', $key);
+        if ($migration !== null) {
+            $this->MigrationHistoryRepository->delete($migration);
+        }
     }
 }

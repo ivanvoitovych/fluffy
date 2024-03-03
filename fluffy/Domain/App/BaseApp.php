@@ -59,6 +59,22 @@ abstract class BaseApp
         }
     }
 
+    function rollbackMigration(string $migration)
+    {
+        $this->setUp();
+        $this->startUp->configureMigrations($this->serviceProvider);
+        // create scope
+        $scope = $this->serviceProvider->createScope();
+        try {
+            // create request and http context
+            /** @var BaseMigrationsContext $migrationsContext */
+            $migrationsContext = $scope->serviceProvider->get(BaseMigrationsContext::class);
+            $migrationsContext->rollback($migration);
+        } finally {
+            $scope->dispose();
+        }
+    }
+
     /**
      * First time installation
      * @return void 

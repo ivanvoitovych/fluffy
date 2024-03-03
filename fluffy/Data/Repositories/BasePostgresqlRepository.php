@@ -244,6 +244,7 @@ class BasePostgresqlRepository
         return true;
     }
 
+    // TODO: drop columns
     public function addColumns(array $columnsSchema)
     {
         $tableName = $this->entityMap::$Table;

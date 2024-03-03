@@ -42,6 +42,10 @@ For example:
 
 `php fluffy migrate`
 
+Rollback migration
+
+`php fluffy migrate rollback Application\\Migrations\\Menu\\MenuItemMigration`
+
 ### Create Entity model
 
 `php fluffy model create EntityName [Namespace]`
