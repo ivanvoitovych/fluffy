@@ -8,6 +8,7 @@ use Fluffy\Data\Entities\BaseEntityMap;
 use Fluffy\Data\Entities\CommonMap;
 use Fluffy\Data\Mapper\IMapper;
 use RuntimeException;
+use Swoole\Coroutine\PostgreSQL;
 
 class BasePostgresqlRepository
 {
@@ -27,6 +28,87 @@ class BasePostgresqlRepository
     {
         $timeOfDay = gettimeofday();
         return $timeOfDay['sec'] * 1000000 + $timeOfDay['usec'];
+    }
+
+    public function search(
+        array $where = [],
+        array $order = [BaseEntityMap::PROPERTY_CreatedOn => 1],
+        int $page = 1,
+        ?int $size = null
+    ) {
+        $pg = $this->connector->get();
+
+        $select = '';
+        $comma = '';
+        foreach ($this->entityMap::Columns() as $property => $_) {
+            $select .= "$comma\"{$property}\"";
+            $comma = ', ';
+        }
+
+        $orderGlue = "ORDER BY ";
+        $orderBy = '';
+        foreach ($order as $column => $orderWay) {
+            $orderBy .= $orderGlue . "\"$column\"" . ($orderWay > 0 ? " ASC" : " DESC");
+            $orderGlue = ', ';
+        }
+
+        $wherePart = $this->buildWhere($where, $pg);
+        if ($wherePart) {
+            $wherePart = "WHERE $wherePart";
+        }
+        $limit = '';
+        if ($size !== null) {
+            $offset = ($page - 1) * $size;
+            $limit = "LIMIT $size OFFSET $offset";
+        }
+        $sql = "SELECT $select FROM {$this->entityMap::$Schema}.\"{$this->entityMap::$Table}\" $wherePart $orderBy $limit";
+        // print_r([$sql]);
+        $stmt = $pg->query($sql);
+        if (!$stmt) {
+            throw new RuntimeException("{$pg->error} {$pg->errCode}");
+        }
+        $arr = $stmt->fetchAll(SW_PGSQL_ASSOC);
+        $list = $arr ? array_map(fn ($row) => $row ? $this->mapper->mapAssoc($this->entityType, $row) : null, $arr) : [];
+        $countSql = "SELECT COUNT(*) as \"count\" FROM {$this->entityMap::$Schema}.\"{$this->entityMap::$Table}\" $wherePart";
+        $stmt = $pg->query($countSql);
+        if (!$stmt) {
+            throw new RuntimeException("{$pg->error} {$pg->errCode}");
+        }
+        $arr = $stmt->fetchAssoc();
+        $count = $arr['count'];
+        return ['list' => $list, 'total' => $count];
+    }
+
+    public function buildWhere(array $where, PostgreSQL $pg, string $concatOperator = "AND"): string
+    {
+        $wherePart = '';
+        $whereGlue = '';
+        foreach ($where as $condition) {
+            $column = $condition[0];
+            $orOperator = is_array($column);
+            if ($orOperator) {
+                $total = count($condition);
+                $wherePart .= $whereGlue . ($total > 1 ? '(' : '') . $this->buildWhere($condition, $pg, 'OR') . ($total > 1 ? ')' : '');
+            } else {
+                $hasOperator = isset($condition[2]);
+                $value = $hasOperator ? $condition[2] : $condition[1];
+                $operator = $hasOperator ? $condition[1] : '=';
+                if (is_bool($value)) {
+                    $value = $value ? 'true' : 'false';
+                } else if ($value === null) {
+                    $value = 'NULL';
+                } else if (is_integer($value)) {
+                    // same
+                } else if (is_float($value)) {
+                    $value = number_format($value, 8, '.', '');
+                } else {
+                    $value = $pg->escapeLiteral($value);
+                }
+                $wherePart .= $whereGlue . "\"$column\" $operator $value";
+            }
+            $whereGlue = " $concatOperator ";
+        }
+        return $wherePart;
     }
 
     public function getList(
