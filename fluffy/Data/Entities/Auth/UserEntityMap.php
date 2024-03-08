@@ -8,24 +8,29 @@ use Fluffy\Data\Entities\CommonMap;
 class UserEntityMap extends BaseEntityMap
 {
     public const PROPERTY_UserName = 'UserName';
+    public const PROPERTY_Email = 'Email';
+    public const PROPERTY_FirstName = 'FirstName';
+    public const PROPERTY_LastName = 'LastName';
     public const PROPERTY_Active = 'Active';
     public const PROPERTY_EmailConfirmed = 'EmailConfirmed';
     public const PROPERTY_Password = 'Password';
 
     public static string $Table = 'User';
+
     public static array $Indexes = [
         'UX_UserName' => [
             'Columns' => ['UserName'],
             'Unique' => true
         ]
     ];
+
     public static function Columns(): array
     {
         return  [
             'Id' => CommonMap::$Id,
             'UserName' => CommonMap::$VarChar255,
-            'FirstName' => CommonMap::$VarChar255Null,
-            'LastName' => CommonMap::$VarChar255Null,
+            'FirstName' => CommonMap::$TextCaseInsensitiveNull,
+            'LastName' => CommonMap::$TextCaseInsensitiveNull,
             'Email' => CommonMap::$VarChar255Null,
             'Password' => CommonMap::$VarChar255Null,
             'Active' => CommonMap::$Boolean,
