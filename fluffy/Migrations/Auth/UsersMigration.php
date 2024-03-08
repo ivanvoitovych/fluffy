@@ -23,8 +23,8 @@ class UsersMigration extends BaseMigration
             [
                 'Id' => CommonMap::$Id,
                 'UserName' => CommonMap::$VarChar255,
-                'FirstName' => CommonMap::$VarChar255Null,
-                'LastName' => CommonMap::$VarChar255Null,
+                'FirstName' => CommonMap::$TextCaseInsensitiveNull,
+                'LastName' => CommonMap::$TextCaseInsensitiveNull,
                 'Email' => CommonMap::$VarChar255Null,
                 'Password' => CommonMap::$VarChar255Null,
                 'Active' => CommonMap::$Boolean,
@@ -42,6 +42,7 @@ class UsersMigration extends BaseMigration
                 ]
             ]
         );
+
         foreach ($this->config->values['admins'] as $user) {
             $admin = new UserEntity();
             $admin->Active = true;
