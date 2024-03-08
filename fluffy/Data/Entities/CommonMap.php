@@ -35,6 +35,10 @@ class CommonMap
         'type' => 'bigint',
         'null' => false,
     ];
+    public static array $MicroDateTimeNull = [
+        'type' => 'bigint',
+        'null' => true,
+    ];
     public static array $TextCaseInsensitive = [
         'type' => 'citext',
         'null' => false,
