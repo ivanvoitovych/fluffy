@@ -9,6 +9,7 @@ class UserEntityMap extends BaseEntityMap
 {
     public const PROPERTY_UserName = 'UserName';
     public const PROPERTY_Email = 'Email';
+    public const PROPERTY_Phone = 'Phone';
     public const PROPERTY_FirstName = 'FirstName';
     public const PROPERTY_LastName = 'LastName';
     public const PROPERTY_Active = 'Active';
@@ -21,6 +22,14 @@ class UserEntityMap extends BaseEntityMap
         'UX_UserName' => [
             'Columns' => ['UserName'],
             'Unique' => true
+        ],
+        'UX_Email' => [
+            'Columns' => ['Email'],
+            'Unique' => true
+        ],
+        'UX_Phone' => [
+            'Columns' => ['Phone'],
+            'Unique' => true
         ]
     ];
 
@@ -32,6 +41,7 @@ class UserEntityMap extends BaseEntityMap
             'FirstName' => CommonMap::$TextCaseInsensitiveNull,
             'LastName' => CommonMap::$TextCaseInsensitiveNull,
             'Email' => CommonMap::$VarChar255Null,
+            'Phone' => CommonMap::$VarChar255Null,
             'Password' => CommonMap::$VarChar255Null,
             'Active' => CommonMap::$Boolean,
             'EmailConfirmed' => CommonMap::$Boolean,

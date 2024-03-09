@@ -10,6 +10,7 @@ class UserEntity extends BaseEntity
     public ?string $FirstName = null;
     public ?string $LastName = null;
     public ?string $Email = null;
+    public ?string $Phone = null;
     public ?string $Password = null;
     public bool $Active = false;
     public bool $EmailConfirmed = false;
