@@ -71,7 +71,15 @@ class AuthorizationService
     {
         $result = new AuthResult();
         /** @var UserEntity|null $user */
-        $user = $this->users->find(UserEntityMap::PROPERTY_UserName, $userName);
+        $user = $this->users->firstOrDefault(
+            [
+                [
+                    [UserEntityMap::PROPERTY_UserName, $userName],
+                    [UserEntityMap::PROPERTY_Email, $userName], // TODO: check format and do not search phone in email
+                    [UserEntityMap::PROPERTY_Phone, $userName]
+                ]
+            ]
+        );
         if ($user) {
             $result->User = $user;
             if (password_verify($password, $user->Password ?? '')) {
@@ -121,9 +129,19 @@ class AuthorizationService
     {
         $result = new RegisterResult();
         if (!isset($user->UserName)) {
-            $user->UserName = $user->Email;
+            $user->UserName = $user->Email ? $user->Email : $user->Phone;
         }
-        $existentUser = $this->users->find(UserEntityMap::PROPERTY_UserName, $user->UserName);
+        $user->Email = $user->Email ? strtolower($user->Email) : null;
+        $user->Phone = $user->Phone ? strtolower($user->Phone) : null;
+        $existentUser = $this->users->firstOrDefault(
+            [
+                [
+                    [UserEntityMap::PROPERTY_UserName, $user->UserName],
+                    [UserEntityMap::PROPERTY_Email, $user->Email ? $user->Email : $user->UserName], // TODO: check format and do not search phone in email
+                    [UserEntityMap::PROPERTY_Phone, $user->Phone ? $user->Phone : $user->UserName]
+                ]
+            ]
+        );
         if ($existentUser !== null) {
             // // Test
             // $result->Success = true;
