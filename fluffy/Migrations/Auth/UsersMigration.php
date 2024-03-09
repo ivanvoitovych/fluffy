@@ -26,6 +26,7 @@ class UsersMigration extends BaseMigration
                 'FirstName' => CommonMap::$TextCaseInsensitiveNull,
                 'LastName' => CommonMap::$TextCaseInsensitiveNull,
                 'Email' => CommonMap::$VarChar255Null,
+                'Phone' => CommonMap::$VarChar255Null,
                 'Password' => CommonMap::$VarChar255Null,
                 'Active' => CommonMap::$Boolean,
                 'EmailConfirmed' => CommonMap::$Boolean,
@@ -38,6 +39,14 @@ class UsersMigration extends BaseMigration
             [
                 'UX_UserName' => [
                     'Columns' => ['UserName'],
+                    'Unique' => true
+                ],
+                'UX_Email' => [
+                    'Columns' => ['Email'],
+                    'Unique' => true
+                ],
+                'UX_Phone' => [
+                    'Columns' => ['Phone'],
                     'Unique' => true
                 ]
             ]
