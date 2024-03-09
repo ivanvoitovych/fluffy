@@ -34,7 +34,8 @@ class BasePostgresqlRepository
         array $where = [],
         array $order = [BaseEntityMap::PROPERTY_CreatedOn => 1],
         int $page = 1,
-        ?int $size = null
+        ?int $size = null,
+        bool $returnCount = true
     ) {
         $pg = $this->connector->get();
 
@@ -69,14 +70,17 @@ class BasePostgresqlRepository
         }
         $arr = $stmt->fetchAll(SW_PGSQL_ASSOC);
         $list = $arr ? array_map(fn ($row) => $row ? $this->mapper->mapAssoc($this->entityType, $row) : null, $arr) : [];
-        $countSql = "SELECT COUNT(*) as \"count\" FROM {$this->entityMap::$Schema}.\"{$this->entityMap::$Table}\" $wherePart";
-        $stmt = $pg->query($countSql);
-        if (!$stmt) {
-            throw new RuntimeException("{$pg->error} {$pg->errCode}");
+        $result = ['list' => $list];
+        if ($returnCount) {
+            $countSql = "SELECT COUNT(*) as \"count\" FROM {$this->entityMap::$Schema}.\"{$this->entityMap::$Table}\" $wherePart";
+            $stmt = $pg->query($countSql);
+            if (!$stmt) {
+                throw new RuntimeException("{$pg->error} {$pg->errCode}");
+            }
+            $arr = $stmt->fetchAssoc();
+            $result['total'] = $arr['count'];
         }
-        $arr = $stmt->fetchAssoc();
-        $count = $arr['count'];
-        return ['list' => $list, 'total' => $count];
+        return $result;
     }
 
     public function buildWhere(array $where, PostgreSQL $pg, string $concatOperator = "AND"): string
@@ -171,7 +175,18 @@ class BasePostgresqlRepository
         return $entity;
     }
 
-    public function find(string $findKey, $value)
+    public function firstOrDefault(
+        array $where = [],
+        array $order = [BaseEntityMap::PROPERTY_CreatedOn => 1]
+    ) {
+        $result = $this->search($where, $order, 1, 1, false);
+        if (count($result['list']) > 0) {
+            return $result['list'][0];
+        }
+        return null;
+    }
+
+    public function find(string | array $findKey, $value)
     {
         $select = '';
         $comma = '';
@@ -180,8 +195,15 @@ class BasePostgresqlRepository
             $comma = ', ';
         }
         $pg = $this->connector->get();
-        $where = "\"{$findKey}\" = {$pg->escapeLiteral($value)}";
-        $sql = "SELECT $select FROM {$this->entityMap::$Schema}.\"{$this->entityMap::$Table}\" WHERE $where";
+        if (is_array($findKey)) {
+            $wherePart = $this->buildWhere($findKey, $pg);
+            if ($wherePart) {
+                $wherePart = "WHERE $wherePart";
+            }
+        } else {
+            $wherePart = "WHERE \"{$findKey}\" = {$pg->escapeLiteral($value)}";
+        }
+        $sql = "SELECT $select FROM {$this->entityMap::$Schema}.\"{$this->entityMap::$Table}\" $wherePart";
         // echo $sql . PHP_EOL;
         $stmt = $pg->query($sql);
         if (!$stmt) {
@@ -327,6 +349,7 @@ class BasePostgresqlRepository
     }
 
     // TODO: drop columns
+    // -- ALTER TABLE IF EXISTS public."User" DROP COLUMN IF EXISTS "UserName";
     public function addColumns(array $columnsSchema)
     {
         $tableName = $this->entityMap::$Table;
@@ -361,6 +384,42 @@ class BasePostgresqlRepository
             throw new RuntimeException("{$pg->error} {$pg->errCode}");
         }
         // $arr = $stmt->fetchAssoc();
+        return true;
+    }
+
+    // TODO: drop indexes
+    // -- DROP INDEX IF EXISTS public."User_UX_Email";
+    public function addIndexes(
+        array $indexesSchema
+    ) {
+        $tableName = $this->entityMap::$Table;
+        $schema = $this->entityMap::$Schema;
+        $comma = '';
+        $indexes = '';
+        foreach ($indexesSchema as $name => $indexMeta) {
+            $indexName = "{$tableName}_$name";
+            $unique = '';
+            if ($indexMeta['Unique']) {
+                $unique = " UNIQUE";
+            }
+            $indexColumns = '';
+            $columnComma = '';
+            foreach ($indexMeta['Columns'] as $column) {
+                $indexColumns .= "$columnComma\"$column\" ASC NULLS LAST";
+                $columnComma = ', ';
+            }
+            $indexSql = <<<EOD
+            CREATE{$unique} INDEX IF NOT EXISTS "$indexName"
+                ON $schema."$tableName" USING btree
+                ($indexColumns);
+            EOD;
+            $indexes .= $comma . $indexSql;
+        }
+        $pg = $this->connector->get();
+        $stmt = $pg->query($indexes);
+        if (!$stmt) {
+            throw new RuntimeException("{$pg->error} {$pg->errCode}");
+        }
         return true;
     }
 
