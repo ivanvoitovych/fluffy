@@ -25,15 +25,19 @@ class ViewiFluffyBridge extends DefaultBridge
             return parent::externalRequest($request); // TODO: use Swoole http client
         }
         /**
-         * @var Container $currentScope
+         * @var ?Container $currentScope
          */
         $currentScope = $currentEngine->getIfExists(Container::class);
-        /**
-         * @var HttpContext $currentHttpContext
-         */
-        $currentHttpContext = $currentScope->serviceProvider->get(HttpContext::class);
-        $cookies = $currentHttpContext->request->getCookie();
-        $headers = $currentHttpContext->request->getHeader();
+        $cookies = [];
+        $headers = [];
+        if ($currentScope !== null) {
+            /**
+             * @var HttpContext $currentHttpContext
+             */
+            $currentHttpContext = $currentScope->serviceProvider->get(HttpContext::class);
+            $cookies = $currentHttpContext->request->getCookie();
+            $headers = $currentHttpContext->request->getHeader();
+        }
         $parts = parse_url($request->url);
         $query = [];
         if (isset($parts['query'])) {
