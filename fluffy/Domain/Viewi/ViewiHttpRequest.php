@@ -6,8 +6,8 @@ use Fluffy\Domain\Message\HttpRequest;
 
 class ViewiHttpRequest extends HttpRequest
 {
-    public array $cookie = [];
-    public array $header = [];
+    public ?array $cookie = [];
+    public ?array $header = [];
 
     public function getBody()
     {
