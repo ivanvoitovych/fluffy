@@ -13,6 +13,7 @@ use Fluffy\Domain\Message\HttpContext;
 use Fluffy\Domain\Message\HttpRequest;
 use Fluffy\Domain\Message\HttpResponse;
 use Fluffy\Migrations\BaseMigrationsContext;
+use Fluffy\Swoole\Cache\CacheManager;
 use Fluffy\Swoole\Task\TaskManager;
 use Fluffy\Swoole\Task\TaskMessage;
 use Throwable;
@@ -114,10 +115,11 @@ abstract class BaseApp
         $registerCallback($this->serviceProvider);
     }
 
-    function setTaskManager(TaskManager $taskManager)
+    function setAppDependencies(TaskManager $taskManager, CacheManager $cacheManager)
     {
         $this->taskManager = $taskManager;
         $this->serviceProvider->setSingleton(TaskManager::class, $taskManager);
+        $this->serviceProvider->setSingleton(CacheManager::class, $cacheManager);
     }
 
     function setUp()
