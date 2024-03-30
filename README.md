@@ -58,6 +58,12 @@ Example:
 
 `php fluffy model build UserTokenEntity Auth`
 
+### Generate Controller
+
+`Catalog/ProductController`
+
+`php fluffy controller create Product Catalog`
+
 ### Cron Tab
 
 `Application\crontab.php`

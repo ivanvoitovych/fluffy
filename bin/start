@@ -110,6 +110,13 @@ switch ($inputs[0]) {
             (new ModelBuilder($currentDir, $params))->build();
             break;
         }
+    case 'controller': {
+            // vendor autoload
+            require $currentDir . '/vendor/autoload.php';
+            require __DIR__ . '/ControllerBuilder.php';
+            (new ControllerBuilder($currentDir, $params))->build();
+            break;
+        }
     case 'nginx': {
             // vendor autoload
             require $currentDir . '/vendor/autoload.php';
