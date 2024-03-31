@@ -64,6 +64,12 @@ Example:
 
 `php fluffy controller create Product Catalog`
 
+### Generate Viewi admin pages
+
+`php fluffy viewi create [Name] [Folder] [ModelsFolder]`
+
+`php fluffy viewi create Order Order Sales`
+
 ### Cron Tab
 
 `Application\crontab.php`

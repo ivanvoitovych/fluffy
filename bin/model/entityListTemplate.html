@@ -1,0 +1,70 @@
+<AdminLayout title="EntityNames">
+    <h3 class="text-h3 mt-2 mb-4">EntityNames</h3>
+    <div class="card shadow-sm">
+
+        <div class="card-body">
+            <div class="row">
+                <div class="col col-md-6 col-lg-5 col-12 pb-4">
+                    <input type="text" class="form-control" placeholder="Search entityNames" aria-label="Search entityNames"
+                        (input)="onSearch">
+                </div>
+                <div class="col col-md-6 col-lg-7 col-12 text-end">
+                    <a href="/admin/entityName/create" type="button" class="btn btn-primary">
+                        <div class="d-flex align-items-center">
+                            <svg class="bi me-2" width="1.5em" height="1.5em">
+                                <use xlink:href="#plus-square"></use>
+                            </svg> Add entityName
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <table class="table align-middle mt-4">
+                <thead>
+                    <tr>
+                        <th scope="col">Id</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Created</th>
+                        <th scope="col" class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr foreach="$items as $item">
+                        <td>{$item->Id}</td>
+                        <td>
+                            {$item->Name}
+                        </td>
+                        <td>{formatDate($item->CreatedOn)}</td>
+                        <td>
+                            <div class="d-flex d-flex justify-content-center">
+                                <a href="/admin/entityName/{$item->Id}" class="btn btn-sm btn-rounded btn-rounded-primary"
+                                    type="button">
+                                    <svg class="bi">
+                                        <use xlink:href="#edit-2"></use>
+                                    </svg>
+                                </a>
+                                <button class="btn btn-sm btn-rounded btn-rounded-primary ms-2" type="button"
+                                    (click)="onDelete($item)">
+                                    <svg class="bi">
+                                        <use xlink:href="#trash-2"></use>
+                                    </svg>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="row mt-4 align-items-center">
+                <div class="col-md-6 col-12">
+                    Showing {$paging->entityFrom} to {$paging->entityTo} of {$paging->total} entries
+                </div>
+                <div class="text-right col-md-6 col-12">
+                    <Pagination paging="$paging" (change)="onPageChange" />
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <Modal #deleteModal closeButton showConfirm confirmButtonText="Yes, delete!" confirmButtonClass="btn-danger"
+        showCancel cancelButtonText="No, cancel" (confirm)="deleteSelected" (cancel)="onDeleteCancel" />
+</AdminLayout>

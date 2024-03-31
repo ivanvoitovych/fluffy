@@ -117,6 +117,13 @@ switch ($inputs[0]) {
             (new ControllerBuilder($currentDir, $params))->build();
             break;
         }
+    case 'viewi': {
+            // vendor autoload
+            require $currentDir . '/vendor/autoload.php';
+            require __DIR__ . '/ViewiPageBuilder.php';
+            (new ViewiPageBuilder($currentDir, $params))->build();
+            break;
+        }
     case 'nginx': {
             // vendor autoload
             require $currentDir . '/vendor/autoload.php';
