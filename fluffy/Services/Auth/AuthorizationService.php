@@ -106,6 +106,14 @@ class AuthorizationService
         return $token;
     }
 
+    public function logout()
+    {
+        if ($this->authorizeRequest()) {
+            $this->userTokens->delete($this->userToken);
+            $this->httpContext->response->setCookie(self::COOKIE_NAME, '', -1, '/', '', 1, 1);
+        }
+    }
+
     public function getOrStartSession(): SessionEntity
     {
         return $this->session->startSession();
