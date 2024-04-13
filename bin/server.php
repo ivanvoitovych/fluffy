@@ -3,6 +3,7 @@
 use Application\App;
 use Application\StartUp;
 use Fluffy\Swoole\Cache\CacheManager;
+use Fluffy\Swoole\RateLimit\RateLimitService;
 use Fluffy\Swoole\Task\TaskManager;
 use Swoole\Constant;
 
@@ -20,7 +21,7 @@ $appServer = new AppServer($port, $config, function (AppServer $appServer) {
     // you have autoload here
     $app = new App(new StartUp());
     $app->setUp();
-    $app->setAppDependencies(new TaskManager($appServer), new CacheManager($appServer));
+    $app->setAppDependencies(new TaskManager($appServer), new CacheManager($appServer), new RateLimitService(($appServer)));
     $appServer->setApp($app);
 });
 $appServer->run();
