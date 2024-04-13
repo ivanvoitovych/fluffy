@@ -14,6 +14,7 @@ use Fluffy\Domain\Message\HttpRequest;
 use Fluffy\Domain\Message\HttpResponse;
 use Fluffy\Migrations\BaseMigrationsContext;
 use Fluffy\Swoole\Cache\CacheManager;
+use Fluffy\Swoole\RateLimit\RateLimitService;
 use Fluffy\Swoole\Task\TaskManager;
 use Fluffy\Swoole\Task\TaskMessage;
 use Throwable;
@@ -115,11 +116,12 @@ abstract class BaseApp
         $registerCallback($this->serviceProvider);
     }
 
-    function setAppDependencies(TaskManager $taskManager, CacheManager $cacheManager)
+    function setAppDependencies(TaskManager $taskManager, CacheManager $cacheManager, RateLimitService $rateLimit)
     {
         $this->taskManager = $taskManager;
         $this->serviceProvider->setSingleton(TaskManager::class, $taskManager);
         $this->serviceProvider->setSingleton(CacheManager::class, $cacheManager);
+        $this->serviceProvider->setSingleton(RateLimitService::class, $rateLimit);
     }
 
     function setUp()
