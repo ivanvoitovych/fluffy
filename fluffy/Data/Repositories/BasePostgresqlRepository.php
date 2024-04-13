@@ -7,6 +7,7 @@ use Fluffy\Data\Entities\BaseEntity;
 use Fluffy\Data\Entities\BaseEntityMap;
 use Fluffy\Data\Entities\CommonMap;
 use Fluffy\Data\Mapper\IMapper;
+use ReflectionClass;
 use RuntimeException;
 use Swoole\Coroutine\PostgreSQL;
 
@@ -224,7 +225,7 @@ class BasePostgresqlRepository
         $entity->UpdatedOn = $now;
         $keyName = $this->entityMap::$PrimaryKeys[0];
         $pg = $this->connector->get();
-        foreach ($this->entityMap::Columns() as $property => $_) {
+        foreach ($this->entityMap::Columns() as $property => $columnMeta) {
             if ($property !== $keyName) {
                 $columns .= "$comma\"{$property}\"";
                 $value = $entity->{$property};
@@ -236,6 +237,8 @@ class BasePostgresqlRepository
                     $value = $entity->{$property};
                 } else if (is_float($entity->{$property})) {
                     $value = number_format($entity->{$property}, 8, '.', '');
+                } elseif ($columnMeta['type'] === 'bytea') {
+                    $value = "decode('" . bin2hex($entity->{$property}) . "', 'hex')";
                 } else {
                     $value = $pg->escapeLiteral($entity->{$property});
                 }
@@ -271,9 +274,9 @@ class BasePostgresqlRepository
             $columnsToUpdate[] = 'UpdatedOn';
             $columnsToUpdate[] = 'UpdatedBy';
         }
-        foreach ($columnsToUpdate ?? $this->entityMap::Columns() as $property => $_) {
+        foreach ($columnsToUpdate ?? $this->entityMap::Columns() as $property => $columnMeta) {
             if ($hasCustom) {
-                $property = $_;
+                $property = $columnMeta;
             }
             if ($property !== $keyName) {
                 $value = $entity->{$property};
@@ -285,6 +288,8 @@ class BasePostgresqlRepository
                     $value = $entity->{$property};
                 } else if (is_float($entity->{$property})) {
                     $value = number_format($entity->{$property}, 8, '.', '');
+                } elseif ($columnMeta['type'] === 'bytea') {
+                    $value = "decode('" . bin2hex($entity->{$property}) . "', 'hex')";
                 } else {
                     $value = $pg->escapeLiteral($entity->{$property});
                 }
