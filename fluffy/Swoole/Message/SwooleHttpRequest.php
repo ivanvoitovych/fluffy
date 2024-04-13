@@ -11,7 +11,8 @@ class SwooleHttpRequest extends HttpRequest
         string $method,
         string $uri,
         array $headers = array(),
-        array $query = array()
+        array $query = array(),
+        array $server = array(),
     ) {
         parent::__construct($method, $uri, $headers, $query);
     }

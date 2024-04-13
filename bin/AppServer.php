@@ -64,7 +64,7 @@ class AppServer
         $this->syncTable->create();
 
         $this->timeTable = new Swoole\Table(1024);
-        $this->timeTable->column('time', Swoole\Table::TYPE_INT);
+        // $this->timeTable->column('time', Swoole\Table::TYPE_INT);
         $this->timeTable->column('value', Swoole\Table::TYPE_INT);
         $this->timeTable->create();
 
@@ -189,7 +189,8 @@ class AppServer
                 $request->server['request_method'],
                 $request->server['request_uri'],
                 $request->header ?? [],
-                $request->get ?? []
+                $request->get ?? [],
+                $request->server
             ),
             $httpResponse
         ));
