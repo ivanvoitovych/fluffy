@@ -20,6 +20,7 @@ class AppServer
     public App $app;
     public Table $crontabTable;
     public Table $syncTable;
+    public Table $timeTable;
     public Atomic $iteration;
     public Table $serverTable;
     public int $requestWorkersCount;
@@ -61,6 +62,11 @@ class AppServer
         $this->syncTable = new Swoole\Table(1024);
         $this->syncTable->column('value', Swoole\Table::TYPE_INT);
         $this->syncTable->create();
+
+        $this->timeTable = new Swoole\Table(1024);
+        $this->timeTable->column('time', Swoole\Table::TYPE_INT);
+        $this->timeTable->column('value', Swoole\Table::TYPE_INT);
+        $this->timeTable->create();
 
         $this->serverTable = new Swoole\Table(1024);
         $this->serverTable->column('data', Swoole\Table::TYPE_STRING, 64);
