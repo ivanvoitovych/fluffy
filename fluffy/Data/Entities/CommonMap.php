@@ -85,6 +85,11 @@ class CommonMap
         'null' => false,
     ];
 
+    public static array $Byte = [
+        'type' => 'bytea',
+        'null' => false,
+    ];
+
     public static function VarChar(int $length, bool $null = false)
     {
         return [
