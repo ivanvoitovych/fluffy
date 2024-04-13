@@ -75,7 +75,7 @@ class RoutingMiddleware implements IMiddleware
                 if ($argumentValue === null) {
                     if ($argument->hasType() && !$argument->getType()->isBuiltin()) {
                         $typeName = $argument->getType()->getName();
-                        if (class_exists($typeName)) {
+                        if (class_exists($typeName) || interface_exists($typeName)) {
                             $argumentValue = $this->container->serviceProvider->get($typeName);
                             if ($argumentValue === null && $stdObject !== null) {
                                 $argumentValue = self::$mapper->map($typeName, $stdObject);
