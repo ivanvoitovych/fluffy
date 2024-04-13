@@ -58,9 +58,19 @@ class BaseController
         ])->WithCode(500);
     }
 
-    public function File($content, $mimeType = null)
+    public function File($content, $mimeType = null, $contentDisposition = null)
     {
-        return ResponseBuilder::File($content, $mimeType);
+        return ResponseBuilder::File($content, $mimeType, $contentDisposition);
+    }
+
+    public function Xml(string $data)
+    {
+        return ResponseBuilder::xml($data);
+    }
+
+    public function Text(string $data)
+    {
+        return ResponseBuilder::text($data);
     }
 
     public function Redirect(string $location, int $code = 302)
