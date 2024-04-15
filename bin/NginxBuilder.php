@@ -21,8 +21,7 @@ class NginxBuilder
         $port = $this->serverConfig[Constant::OPTION_PORT] ?? 8101;
         $domain = $this->inputs[0];
         $rootPath = realpath($this->serverConfig['swoole'][Constant::OPTION_DOCUMENT_ROOT]);
-        if(!file_exists($this->serverConfig['static_files']))
-        {
+        if (!file_exists($this->serverConfig['static_files'])) {
             mkdir($this->serverConfig['static_files'], 0777, true);
             // sudo chmod -R 0777 /home/ivan/nutritionFiles
         }
@@ -33,9 +32,10 @@ class NginxBuilder
             'domain' => $domain,
             'port' => $port,
             'rootPath' => $rootPath,
-            'upstream' => $upstream
+            'upstream' => $upstream,
+            'staticFiles' => $staticFiles
         ]);
-        $templatePath = '/setup/nginx';
+        $templatePath = '/setup/nginx.conf';
         $template = file_get_contents(__DIR__ . $templatePath);
         $template = str_replace('_UPSTREAM_', $upstream, $template);
         $template = str_replace('_PORT_', $port, $template);
@@ -48,7 +48,7 @@ class NginxBuilder
         $linkPath = "/etc/nginx/sites-enabled/$domain";
         symlink($nginxConfigPath, $linkPath);
         echo "[NginxBuilder] Link check for $linkPath = " . readlink($linkPath) . PHP_EOL;
-        echo "[NginxBuilder] Reloading Nginx server.". PHP_EOL;
+        echo "[NginxBuilder] Reloading Nginx server." . PHP_EOL;
         System('sudo service nginx reload');
     }
 }
