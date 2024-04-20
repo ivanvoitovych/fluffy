@@ -2,9 +2,11 @@
 
 namespace Fluffy\Swoole\RateLimit;
 
+use Fluffy\Swoole\Task\TaskManager;
+
 class RateLimitService
 {
-    public function __construct(private \AppServer $appServer)
+    public function __construct(private \AppServer $appServer, private TaskManager $taskManager)
     {
     }
 
@@ -12,11 +14,10 @@ class RateLimitService
     {
         $final = $this->appServer->timeTable->incr($key, 'value');
         // print_r([$key, $final]);
-        if ($final === 1) {
-            // set up clean up timer
-            \Swoole\Timer::after($lifetime * 1000, function () use ($key) {
-                $this->appServer->timeTable->del($key);
-            });
+        if ($final === 1) { $lifetime = 20;
+            $expireSec = time() + $lifetime;
+            $this->appServer->timeTable->incr($key, 'time', $expireSec);
+            $this->taskManager->setLimitTimer($key, $expireSec);
         }
         if ($final > $max) {
             // do not allow overflow
