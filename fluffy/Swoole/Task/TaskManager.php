@@ -143,6 +143,11 @@ class TaskManager
             echo "[Crontab] -$time $jobKey finished on worker {$this->workerId} [{$this->uniqueId}]." . PHP_EOL;
             $this->appServer->iteration->sub();
             $this->sendToWorker(new TaskMessage($this->uniqueId, [TaskManager::class, 'onCronJobFinish', [$message->data]]), $message->workerId);
+        } elseif ($message->data instanceof TimerTask) {
+            Timer::after(($message->data->expireAtSec - time()) * 1000, function () use ($message) {
+                // echo "[RateLimit] resetting limit for key {$message->data->key} at {$this->workerId} [{$this->uniqueId}]." . PHP_EOL;
+                $this->appServer->timeTable->del($message->data->key);
+            });
         } else {
             [$class, $method, $params] = $message->data;
             $this->appServer->app->task($class, $method, $params);
@@ -166,6 +171,11 @@ class TaskManager
         } else {
             $this->processMessage($message);
         }
+    }
+
+    public function setLimitTimer(string $key, int $expireAtSec)
+    {
+        $this->sendToWorker(new TaskMessage($this->uniqueId, new TimerTask($key, $expireAtSec)), $this->appServer->timerWorkerId);
     }
 
     public function onCronJobFinish(CronTabItem $crontabItem)
