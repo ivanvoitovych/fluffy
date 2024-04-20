@@ -28,7 +28,9 @@ class PostgreSQLConnector implements IConnector, IDisposable
     public function dispose()
     {
         if (isset($this->pg)) {
-            $this->connectionPool->put($this->pg);
+            $broken = $this->pg->error && !$this->pg->resultDiag['sqlstate'];
+            // echo "PUT connection $broken" . PHP_EOL;
+            $this->connectionPool->put($broken ? null : $this->pg);
             unset($this->pg);
         }
     }

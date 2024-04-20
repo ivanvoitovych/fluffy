@@ -67,6 +67,7 @@ class BasePostgresqlRepository
         // print_r([$sql]);
         $stmt = $pg->query($sql);
         if (!$stmt) {
+            // print_r([$stmt, $pg]);
             throw new RuntimeException("{$pg->error} {$pg->errCode}");
         }
         $arr = $stmt->fetchAll(SW_PGSQL_ASSOC);
@@ -208,6 +209,7 @@ class BasePostgresqlRepository
         // echo $sql . PHP_EOL;
         $stmt = $pg->query($sql);
         if (!$stmt) {
+            // print_r([$stmt, $pg]);
             throw new RuntimeException("{$pg->error} {$pg->errCode}");
         }
         $arr = $stmt->fetchAssoc();
