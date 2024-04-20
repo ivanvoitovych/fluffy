@@ -7,7 +7,6 @@ use Fluffy\Swoole\Message\SwooleHttpRequest;
 use Fluffy\Swoole\Message\SwooleHttpResponse;
 use Swoole\Atomic;
 use Swoole\Constant;
-use Swoole\Event;
 use Swoole\Table;
 use Swoole\Timer;
 use Swoole\WebSocket\Frame;
@@ -27,6 +26,7 @@ class AppServer
     public int $taskWorkersCount;
     public string $uniqueId;
     public bool $stopped = false;
+    public int $timerWorkerId = 0;
     /**
      * 
      * @param int|string $port 
@@ -53,7 +53,7 @@ class AppServer
 
     public function run()
     {
-        $this->iteration = new Swoole\Atomic();
+        $this->iteration = new Atomic();
         $this->crontabTable = new Swoole\Table(1024);
         $this->crontabTable->column('isRunning', Swoole\Table::TYPE_INT);
         $this->crontabTable->column('lastRun', Swoole\Table::TYPE_INT);
@@ -64,7 +64,7 @@ class AppServer
         $this->syncTable->create();
 
         $this->timeTable = new Swoole\Table(1024);
-        // $this->timeTable->column('time', Swoole\Table::TYPE_INT);
+        $this->timeTable->column('time', Swoole\Table::TYPE_INT);
         $this->timeTable->column('value', Swoole\Table::TYPE_INT);
         $this->timeTable->create();
 
@@ -109,6 +109,25 @@ class AppServer
     {
         echo "CPU numbers: " . swoole_cpu_num() . "\n";
         echo "Swoole http server is started at http://0.0.0.0:{$this->port}\n";
+        // go(function () {
+        //     while (1) {
+        //         echo "[Timer] time table watcher waiting.\n";
+        //         $this->waiter->wait(-1);
+        //         [$key, $lifetime] = ['ss', 10];
+        //         echo "[Timer] received.\n";
+        //         print_r([$key, $lifetime]);
+        //         if ($key) {
+        //             var_dump([$key, $lifetime]);
+        //             // set up clean up timer
+        //             \Swoole\Timer::after($lifetime * 1000, function () use ($key) {
+        //                 $this->timeTable->del($key);
+        //             });
+        //         } else {
+        //             echo "[Server] time table watcher stopped.\n";
+        //             break;
+        //         }
+        //     }
+        // });
     }
 
     public function onWorkerStart(Server $server, $workerId)
@@ -154,6 +173,7 @@ class AppServer
             $this->taskWorkersCount = $this->config['swoole'][Constant::OPTION_TASK_WORKER_NUM];
             // Use ping or your connection will get closed after ~1min of inactivity
             if ($workerId === ($this->taskWorkersCount + $this->requestWorkersCount - 1)) {
+                $this->timerWorkerId = $workerId;
                 Swoole\Timer::tick(self::PING_DELAY_MS, function () use ($server) {
                     foreach ($server->connections as $fd) {
                         if ($server->isEstablished($fd)) {
@@ -162,6 +182,22 @@ class AppServer
                         }
                     }
                 });
+
+                $now = time();
+                $toDelete = [];
+                foreach ($this->timeTable as $key => $row) {
+                    if ($row['time'] < $now) {
+                        // expired
+                        $toDelete[] = $key;
+                    } else {
+                        Timer::after(($row['time'] - $now) * 1000, function () use ($key) {
+                            $this->timeTable->del($key);
+                        });
+                    }
+                }
+                foreach ($toDelete as $key) {
+                    $this->timeTable->del($key);
+                }
 
                 // Cron jobs
                 // last request/task worker
