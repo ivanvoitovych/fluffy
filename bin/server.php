@@ -21,7 +21,8 @@ $appServer = new AppServer($port, $config, function (AppServer $appServer) {
     // you have autoload here
     $app = new App(new StartUp());
     $app->setUp();
-    $app->setAppDependencies(new TaskManager($appServer), new CacheManager($appServer), new RateLimitService(($appServer)));
+    $taskManager = new TaskManager($appServer);
+    $app->setAppDependencies($taskManager, new CacheManager($appServer), new RateLimitService($appServer, $taskManager));
     $appServer->setApp($app);
 });
 $appServer->run();
