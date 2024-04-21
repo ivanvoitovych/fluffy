@@ -14,7 +14,7 @@ class RateLimitService
     {
         $final = $this->appServer->timeTable->incr($key, 'value');
         // print_r([$key, $final]);
-        if ($final === 1) { $lifetime = 20;
+        if ($final === 1) {
             $expireSec = time() + $lifetime;
             $this->appServer->timeTable->incr($key, 'time', $expireSec);
             $this->taskManager->setLimitTimer($key, $expireSec);
