@@ -13,13 +13,16 @@ class CacheManager
      * @var CacheItem[]
      */
     private array $cacheItems = [];
-
-    private Channel $channel;
+    /**
+     * 
+     * @var Channel[]
+     */
+    private array $channels = [];
 
     public function __construct(private \AppServer $appServer)
     {
-        $this->channel = new Channel(1);
-        $this->channel->push(1);
+        $this->appServer->channel->push(1);
+        // echo '[CacheManager] Channel ready ' . $this->appServer->server->getWorkerId() . ' ' . $this->appServer->uniqueId . ' ' .  PHP_EOL;
     }
 
     public function get(string $key): mixed
@@ -47,8 +50,14 @@ class CacheManager
 
     public function set(string $key, callable $action): mixed
     {
-        $this->channel->pop();
+        $this->appServer->channel->pop();
+        if (!isset($this->channels[$key])) {
+            $this->channels[$key] = new Channel(1);
+            $this->channels[$key]->push(1);
+        }
+        $this->appServer->channel->push(1);
         // print_r("Channel {$this->appServer->uniqueId} locked\n");
+        $this->channels[$key]->pop();
         try {
             // check the data again
             $data = $this->get($key);
@@ -63,6 +72,8 @@ class CacheManager
             } else {
                 $this->appServer->syncTable->set($key, ['value' => $syncKey]);
             }
+            // echo '[CacheManager] Set cache item Sync: ' . $syncKey . ' ' . $this->appServer->server->getWorkerId() . ' ' . $this->appServer->uniqueId . ' ' . $key . PHP_EOL;
+            // var_dump($this->appServer->syncTable->get($key));
             $data = $action();
             $this->cacheItems[$key] = new CacheItem($syncKey, $data);
             // print_r($this->cacheItems);
@@ -70,7 +81,7 @@ class CacheManager
             return $data;
         } finally {
             // print_r("Channel {$this->appServer->uniqueId} released\n");
-            $this->channel->push(1);
+            $this->channels[$key]->push(1);
         }
     }
 }

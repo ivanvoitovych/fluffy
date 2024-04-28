@@ -7,6 +7,7 @@ use Fluffy\Swoole\Message\SwooleHttpRequest;
 use Fluffy\Swoole\Message\SwooleHttpResponse;
 use Swoole\Atomic;
 use Swoole\Constant;
+use Swoole\Coroutine\Channel;
 use Swoole\Table;
 use Swoole\Timer;
 use Swoole\WebSocket\Frame;
@@ -27,6 +28,7 @@ class AppServer
     public string $uniqueId;
     public bool $stopped = false;
     public int $timerWorkerId = 0;
+    public Channel $channel;
     /**
      * 
      * @param int|string $port 
@@ -132,6 +134,7 @@ class AppServer
 
     public function onWorkerStart(Server $server, $workerId)
     {
+        $this->channel = new Channel(1);
         // var_dump(get_included_files());
         try {
             if (function_exists('apc_clear_cache')) {
