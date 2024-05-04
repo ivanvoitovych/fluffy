@@ -36,7 +36,8 @@ class BasePostgresqlRepository
         array $order = [BaseEntityMap::PROPERTY_CreatedOn => 1],
         int $page = 1,
         ?int $size = null,
-        bool $returnCount = true
+        bool $returnCount = true,
+        ?array $aggregate = null
     ) {
         $pg = $this->connector->get();
 
@@ -63,15 +64,18 @@ class BasePostgresqlRepository
             $offset = ($page - 1) * $size;
             $limit = "LIMIT $size OFFSET $offset";
         }
-        $sql = "SELECT $select FROM {$this->entityMap::$Schema}.\"{$this->entityMap::$Table}\" $wherePart $orderBy $limit";
-        // print_r([$sql]);
-        $stmt = $pg->query($sql);
-        if (!$stmt) {
-            // print_r([$stmt, $pg]);
-            throw new RuntimeException("{$pg->error} {$pg->errCode}");
+        $list = [];
+        if ($size !== 0) {
+            $sql = "SELECT $select FROM {$this->entityMap::$Schema}.\"{$this->entityMap::$Table}\" $wherePart $orderBy $limit";
+            // print_r([$sql]);
+            $stmt = $pg->query($sql);
+            if (!$stmt) {
+                // print_r([$stmt, $pg]);
+                throw new RuntimeException("{$pg->error} {$pg->errCode}");
+            }
+            $arr = $stmt->fetchAll(SW_PGSQL_ASSOC);
+            $list = $arr ? array_map(fn ($row) => $row ? $this->mapper->mapAssoc($this->entityType, $row) : null, $arr) : [];
         }
-        $arr = $stmt->fetchAll(SW_PGSQL_ASSOC);
-        $list = $arr ? array_map(fn ($row) => $row ? $this->mapper->mapAssoc($this->entityType, $row) : null, $arr) : [];
         $result = ['list' => $list];
         if ($returnCount) {
             $countSql = "SELECT COUNT(*) as \"count\" FROM {$this->entityMap::$Schema}.\"{$this->entityMap::$Table}\" $wherePart";
@@ -81,6 +85,22 @@ class BasePostgresqlRepository
             }
             $arr = $stmt->fetchAssoc();
             $result['total'] = $arr['count'];
+        }
+        if ($aggregate !== null) {
+            $aggregateSql = '';
+            $dlm = '';
+            foreach ($aggregate as $aggregateItem) {
+                $aggregateSql .= $dlm . $aggregateItem[1] . '("' . $aggregateItem[2] . '") as "' . $aggregateItem[0] . '"';
+                $dlm = ', ';
+            }
+            $countSql = "SELECT $aggregateSql FROM {$this->entityMap::$Schema}.\"{$this->entityMap::$Table}\" $wherePart";
+            // print_r([$countSql]);
+            $stmt = $pg->query($countSql);
+            if (!$stmt) {
+                throw new RuntimeException("{$pg->error} {$pg->errCode}");
+            }
+            $arr = $stmt->fetchAssoc();
+            $result['aggregate'] = $arr;
         }
         return $result;
     }
