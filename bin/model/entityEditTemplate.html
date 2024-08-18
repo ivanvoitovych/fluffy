@@ -37,6 +37,8 @@
                 </div>
             </div>
 
+            <ValidationMessage #generalMessages fallback="true" wrapperClass="mb-3" />
+
             <ActionButton text="{$createMode ? 'Create' : 'Save'}" state="$state" />
         </ActionForm>
     </div>

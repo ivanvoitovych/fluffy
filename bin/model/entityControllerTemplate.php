@@ -4,9 +4,7 @@ namespace Application\Controllers\Admin\SubFolder;
 
 use Application\Data\Entities\SubFolder\EntityNameEntity;
 use Application\Data\Entities\SubFolder\EntityNameEntityMap;
-use Application\Data\Entities\Media\PictureEntity;
 use Application\Data\Repositories\EntityNameRepository;
-use Application\Data\Repositories\PictureRepository;
 use Application\Services\Auth\MemberAuthorization;
 use Components\Models\SubFolder\BaseEntityNameModel;
 use Components\Models\SubFolder\EntityNameModel;
@@ -19,7 +17,6 @@ class EntityNameController extends BaseController
     function __construct(
         protected IMapper $mapper,
         protected EntityNameRepository $entityNames,
-        protected PictureRepository $pictures,
         protected MemberAuthorization $auth
     ) {
     }
@@ -31,8 +28,17 @@ class EntityNameController extends BaseController
         }
         $search = trim($search ?? '');
         $where = [];
+        
         if ($search) {
-            $where = [[EntityNameEntityMap::PROPERTY_Title, 'like', "%$search%"]];
+            $search = strtolower($search);
+            $parts = explode(' ', $search);
+            foreach ($parts as $part) {
+                if (trim($part)) {
+                    $where[] = [
+                        [EntityNameEntityMap::PROPERTY_Title, 'like', "%$part%"]
+                    ];
+                }
+            }
         }
         $entities = $this->entityNames->search($where, [EntityNameEntityMap::PROPERTY_CreatedOn => 1], $page, $size);
         $models = array_map(fn ($entity) => $this->mapper->map(EntityNameModel::class, $entity), $entities['list']);
@@ -52,13 +58,6 @@ class EntityNameController extends BaseController
          * @var EntityNameModel $model
          */
         $model = $this->mapper->map(EntityNameModel::class, $entity);
-        if ($model->PictureId !== null) {
-            /**
-             * @var ?PictureEntity $picture
-             */
-            $picture = $this->pictures->getById($model->PictureId);
-            $model->PicturePath = $picture->Path;
-        }
         return $model;
     }
 
@@ -93,13 +92,6 @@ class EntityNameController extends BaseController
              * @var EntityNameModel $model
              */
             $model = $this->mapper->map(EntityNameModel::class, $entityNameEntity);
-            if ($model->PictureId !== null) {
-                /**
-                 * @var ?PictureEntity $picture
-                 */
-                $picture = $this->pictures->getById($model->PictureId);
-                $model->PicturePath = $picture->Path;
-            }
         }
         return $model;
     }
