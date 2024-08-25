@@ -21,14 +21,42 @@ class BasePostgresqlRepository
      * @param BaseEntityMap|string $entityMap 
      * @return void 
      */
-    public function __construct(private IMapper $mapper, private IConnector $connector, private string $entityType, private string $entityMap)
-    {
-    }
+    public function __construct(private IMapper $mapper, private IConnector $connector, private string $entityType, private string $entityMap) {}
 
     static function GetTime(): int
     {
         $timeOfDay = gettimeofday();
         return $timeOfDay['sec'] * 1000000 + $timeOfDay['usec'];
+    }
+
+    public function include(
+        array &$entities,
+        BasePostgresqlRepository $repository,
+        string $referenceKey,
+        string $referenceName
+    ) {
+        // collect ids
+        $ids = array_map(fn(BaseEntity $entity) => $entity->{$referenceKey}, $entities);
+        if (count($ids) > 0) {
+            $includes = $repository->search([
+                [BaseEntityMap::PROPERTY_Id, 'in', $ids]
+            ], [BaseEntityMap::PROPERTY_CreatedOn => 1], 1, null, false);
+            $map = [];
+            foreach ($includes['list'] as $entity) {
+                /**
+                 * @var BaseEntity $entity
+                 */
+                $map[$entity->Id] = $entity;
+            }
+            foreach ($entities as $entity) {
+                /**
+                 * @var BaseEntity $entity
+                 */
+                if (isset($map[$entity->{$referenceKey}])) {
+                    $entity->{$referenceName} = $map[$entity->{$referenceKey}];
+                }
+            }
+        }
     }
 
     public function search(
@@ -74,7 +102,7 @@ class BasePostgresqlRepository
                 throw new RuntimeException("{$pg->error} {$pg->errCode}");
             }
             $arr = $stmt->fetchAll(SW_PGSQL_ASSOC);
-            $list = $arr ? array_map(fn ($row) => $row ? $this->mapper->mapAssoc($this->entityType, $row) : null, $arr) : [];
+            $list = $arr ? array_map(fn($row) => $row ? $this->mapper->mapAssoc($this->entityType, $row) : null, $arr) : [];
         }
         $result = ['list' => $list];
         if ($returnCount) {
@@ -117,24 +145,32 @@ class BasePostgresqlRepository
                 $wherePart .= $whereGlue . ($total > 1 ? '(' : '') . $this->buildWhere($condition, $pg, 'OR') . ($total > 1 ? ')' : '');
             } else {
                 $hasOperator = isset($condition[2]);
-                $value = $hasOperator ? $condition[2] : $condition[1];
+                $value = $this->buildValue($hasOperator ? $condition[2] : $condition[1], $pg);
                 $operator = $hasOperator ? $condition[1] : '=';
-                if (is_bool($value)) {
-                    $value = $value ? 'true' : 'false';
-                } else if ($value === null) {
-                    $value = 'NULL';
-                } else if (is_integer($value)) {
-                    // same
-                } else if (is_float($value)) {
-                    $value = number_format($value, 8, '.', '');
-                } else {
-                    $value = $pg->escapeLiteral($value);
-                }
+
                 $wherePart .= $whereGlue . "\"$column\" $operator $value";
             }
             $whereGlue = " $concatOperator ";
         }
         return $wherePart;
+    }
+
+    public function buildValue($value, PostgreSQL $pg)
+    {
+        if (is_bool($value)) {
+            $value = $value ? 'true' : 'false';
+        } else if ($value === null) {
+            $value = 'NULL';
+        } else if (is_integer($value)) {
+            // same
+        } else if (is_float($value)) {
+            $value = number_format($value, 8, '.', '');
+        } else if (is_array($value)) {
+            $value = "(" . implode(", ", array_map(fn($x) => $this->buildValue($x, $pg, ""), $value)) . ")";
+        } else {
+            $value = $pg->escapeLiteral($value);
+        }
+        return $value;
     }
 
     public function getList(
@@ -163,7 +199,7 @@ class BasePostgresqlRepository
             throw new RuntimeException("{$pg->error} {$pg->errCode}");
         }
         $arr = $stmt->fetchAll(SW_PGSQL_ASSOC);
-        $list = $arr ? array_map(fn ($row) => $row ? $this->mapper->mapAssoc($this->entityType, $row) : null, $arr) : [];
+        $list = $arr ? array_map(fn($row) => $row ? $this->mapper->mapAssoc($this->entityType, $row) : null, $arr) : [];
         $countSql = "SELECT COUNT(*) as \"count\" FROM {$this->entityMap::$Schema}.\"{$this->entityMap::$Table}\"";
         $stmt = $pg->query($countSql);
         if (!$stmt) {
