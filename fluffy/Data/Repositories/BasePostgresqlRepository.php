@@ -23,7 +23,7 @@ class BasePostgresqlRepository
      */
     public function __construct(private IMapper $mapper, private IConnector $connector, private string $entityType, private string $entityMap) {}
 
-    static function GetTime(): int
+    static function getTime(): int
     {
         $timeOfDay = gettimeofday();
         return $timeOfDay['sec'] * 1000000 + $timeOfDay['usec'];
@@ -278,7 +278,7 @@ class BasePostgresqlRepository
         $columns = '';
         $values = '';
         $comma = '';
-        $now = self::GetTime();
+        $now = self::getTime();
         $entity->CreatedOn = $now;
         $entity->UpdatedOn = $now;
         $keyName = $this->entityMap::$PrimaryKeys[0];
@@ -323,7 +323,7 @@ class BasePostgresqlRepository
     {
         $columns = '';
         $comma = '';
-        $now = self::GetTime();
+        $now = self::getTime();
         $entity->UpdatedOn = $now;
         $keyName = $this->entityMap::$PrimaryKeys[0];
         $pg = $this->connector->get();
