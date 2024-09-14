@@ -95,7 +95,7 @@ class BasePostgresqlRepository
         $list = [];
         if ($size !== 0) {
             $sql = "SELECT $select FROM {$this->entityMap::$Schema}.\"{$this->entityMap::$Table}\" $wherePart $orderBy $limit";
-            // print_r([$sql]);
+            // var_dump([$sql, $where]);
             $stmt = $pg->query($sql);
             if (!$stmt) {
                 // print_r([$stmt, $pg]);
