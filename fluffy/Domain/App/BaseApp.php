@@ -2,6 +2,7 @@
 
 namespace Fluffy\Domain\App;
 
+use AppServer;
 use DotDi\DependencyInjection\IServiceProvider;
 use DotDi\DependencyInjection\ServiceProvider;
 use Fluffy\Domain\CronTab\CronTab;
@@ -12,9 +13,8 @@ use Fluffy\Domain\Message\FpmHttpResponse;
 use Fluffy\Domain\Message\HttpContext;
 use Fluffy\Domain\Message\HttpRequest;
 use Fluffy\Domain\Message\HttpResponse;
+use Fluffy\Domain\Message\SocketMessage;
 use Fluffy\Migrations\BaseMigrationsContext;
-use Fluffy\Swoole\Cache\CacheManager;
-use Fluffy\Swoole\RateLimit\RateLimitService;
 use Fluffy\Swoole\Task\TaskManager;
 use Fluffy\Swoole\Task\TaskMessage;
 use Throwable;
@@ -116,12 +116,9 @@ abstract class BaseApp
         $registerCallback($this->serviceProvider);
     }
 
-    function setAppDependencies(TaskManager $taskManager, CacheManager $cacheManager, RateLimitService $rateLimit)
+    function setAppDependencies(AppServer $appServer)
     {
-        $this->taskManager = $taskManager;
-        $this->serviceProvider->setSingleton(TaskManager::class, $taskManager);
-        $this->serviceProvider->setSingleton(CacheManager::class, $cacheManager);
-        $this->serviceProvider->setSingleton(RateLimitService::class, $rateLimit);
+        $this->serviceProvider->setSingleton(AppServer::class, $appServer);
     }
 
     function setUp()
@@ -202,6 +199,7 @@ abstract class BaseApp
     {
         echo '[Server] startCrontab.' . PHP_EOL;
         try {
+            $this->taskManager = $this->serviceProvider->get(TaskManager::class);
             $this->taskManager->resetCronTable();
             $jobs = CronTab::getJobs();
             foreach ($jobs as $job) {
