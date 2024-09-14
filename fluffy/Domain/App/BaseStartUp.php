@@ -31,6 +31,9 @@ use Fluffy\Data\Repositories\UserTokenRepository;
 use Fluffy\Data\Repositories\UserVerificationCodeRepository;
 use Fluffy\Domain\App\IStartUp;
 use Fluffy\Domain\Viewi\ViewiFluffyBridge;
+use Fluffy\Swoole\Cache\CacheManager;
+use Fluffy\Swoole\RateLimit\RateLimitService;
+use Fluffy\Swoole\Task\TaskManager;
 use Viewi\App;
 use Viewi\Bridge\IViewiBridge;
 use Viewi\Engine;
@@ -49,6 +52,9 @@ class BaseStartUp implements IStartUp
 
     function configureServices(IServiceProvider $serviceProvider): void
     {
+        $serviceProvider->addSingleton(TaskManager::class);
+        $serviceProvider->addSingleton(CacheManager::class);
+        $serviceProvider->addSingleton(RateLimitService::class);
         $this->config = new Config();
         $this->config->addArray(require($this->appDir . '/config.php'));
         $serviceProvider->setSingleton(Config::class, $this->config);
