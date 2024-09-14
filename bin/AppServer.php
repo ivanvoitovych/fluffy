@@ -8,6 +8,7 @@ use Fluffy\Swoole\Message\SwooleHttpResponse;
 use Swoole\Atomic;
 use Swoole\Constant;
 use Swoole\Coroutine\Channel;
+use Swoole\Http\Request;
 use Swoole\Table;
 use Swoole\Timer;
 use Swoole\WebSocket\Frame;
@@ -236,7 +237,7 @@ class AppServer
         //$response->end("Hello world {$this->server->worker_id} {$this->server->myServerId}");        
     }
 
-    public function onOpen($server, $request)
+    public function onOpen($server, Request $request)
     {
         echo "server: handshake success with fd{$request->fd}\n";
     }

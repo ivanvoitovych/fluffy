@@ -2,9 +2,6 @@
 
 use Application\App;
 use Application\StartUp;
-use Fluffy\Swoole\Cache\CacheManager;
-use Fluffy\Swoole\RateLimit\RateLimitService;
-use Fluffy\Swoole\Task\TaskManager;
 use Swoole\Constant;
 
 $currentDir = getcwd();
@@ -20,9 +17,8 @@ $port = $config[Constant::OPTION_PORT] ?? (getenv('PORT') ?: 8101);
 $appServer = new AppServer($port, $config, function (AppServer $appServer) {
     // you have autoload here
     $app = new App(new StartUp());
-    $app->setUp();
-    $taskManager = new TaskManager($appServer);
-    $app->setAppDependencies($taskManager, new CacheManager($appServer), new RateLimitService($appServer, $taskManager));
+    $app->setUp();    
+    $app->setAppDependencies($appServer);
     $appServer->setApp($app);
 });
 $appServer->run();
