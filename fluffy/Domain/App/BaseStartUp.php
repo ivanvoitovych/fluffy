@@ -34,6 +34,7 @@ use Fluffy\Domain\Viewi\ViewiFluffyBridge;
 use Fluffy\Swoole\Cache\CacheManager;
 use Fluffy\Swoole\RateLimit\RateLimitService;
 use Fluffy\Swoole\Task\TaskManager;
+use Fluffy\Swoole\Websocket\HubServer;
 use Viewi\App;
 use Viewi\Bridge\IViewiBridge;
 use Viewi\Engine;
@@ -55,6 +56,7 @@ class BaseStartUp implements IStartUp
         $serviceProvider->addSingleton(TaskManager::class);
         $serviceProvider->addSingleton(CacheManager::class);
         $serviceProvider->addSingleton(RateLimitService::class);
+        $serviceProvider->addSingleton(HubServer::class);
         $this->config = new Config();
         $this->config->addArray(require($this->appDir . '/config.php'));
         $serviceProvider->setSingleton(Config::class, $this->config);

@@ -37,9 +37,7 @@ class AppServer
      * @param callable $workerAction 
      * @return void 
      */
-    public function __construct(private $port, private $config, private $workerAction)
-    {
-    }
+    public function __construct(private $port, private $config, private $workerAction) {}
 
     public function setApp(App $app)
     {
@@ -240,6 +238,14 @@ class AppServer
     public function onOpen($server, Request $request)
     {
         echo "server: handshake success with fd{$request->fd}\n";
+        // print_r([$server->worker_id, $this->uniqueId, new SwooleHttpRequest(
+        //     $request,
+        //     $request->server['request_method'],
+        //     $request->server['request_uri'],
+        //     $request->header ?? [],
+        //     $request->get ?? [],
+        //     $request->server
+        // ), $request]);
     }
 
     public function onMessage(Server $server, Frame $frame)
