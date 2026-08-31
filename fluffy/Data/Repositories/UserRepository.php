@@ -7,6 +7,7 @@ use Fluffy\Data\Entities\Auth\UserEntityMap;
 use DotDi\Attributes\Inject;
 use Fluffy\Data\Repositories\BasePostgresqlRepository;
 
+/** @extends BasePostgresqlRepository<UserEntity> */
 #[Inject(['entityType' => UserEntity::class, 'entityMap' => UserEntityMap::class])]
 class UserRepository extends BasePostgresqlRepository
 {

@@ -7,6 +7,7 @@ use Fluffy\Data\Entities\Auth\SessionEntityMap;
 use DotDi\Attributes\Inject;
 use Fluffy\Data\Repositories\BasePostgresqlRepository;
 
+/** @extends BasePostgresqlRepository<SessionEntity> */
 #[Inject(['entityType' => SessionEntity::class, 'entityMap' => SessionEntityMap::class])]
 class SessionRepository extends BasePostgresqlRepository
 {

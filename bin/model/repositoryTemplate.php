@@ -7,6 +7,7 @@ use Application\Data\Entities\SubFolder\EntityNameMap;
 use DotDi\Attributes\Inject;
 use Fluffy\Data\Repositories\BasePostgresqlRepository;
 
+/** @extends BasePostgresqlRepository<EntityName> */
 #[Inject(['entityType' => EntityName::class, 'entityMap' => EntityNameMap::class])]
 class EntityBaseNameRepository extends BasePostgresqlRepository
 {
