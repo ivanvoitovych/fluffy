@@ -43,6 +43,7 @@ use Fluffy\Services\Cache\RedisCache;
 use Fluffy\Swoole\Cache\CacheManager;
 use Fluffy\Swoole\Database\IPostgresqlPool;
 use Fluffy\Swoole\Database\PostgresPDOPool;
+use Fluffy\Swoole\Database\RedisCachePool;
 use Fluffy\Swoole\RateLimit\IRateLimitService;
 use Fluffy\Swoole\RateLimit\RedisRateLimitService;
 use Fluffy\Swoole\RateLimit\SwooleTableRateLimitService;
@@ -128,18 +129,26 @@ class BaseStartUp implements IStartUp
                     ->withPassword($pgConfig['password']),
                 $pgConfig['poolSize'] ?? 8
             );
+            // Bounded wait for a free connection. Without it a drained pool wedges the worker
+            // FOREVER and the failure is invisible - see WaitsForConnection.
+            if (isset($pgConfig['poolWaitSeconds'])) {
+                $pgPool->withWaitTimeout((float) $pgConfig['poolWaitSeconds']);
+            }
             $serviceProvider->setSingleton(IPostgresqlPool::class, $pgPool);
             $serviceProvider->addScoped(IConnector::class, PostgreSqlPDOConnector::class);
         }
         if (isset($this->config->values['redis'])) {
             $redisConfig = $this->config->values['redis'];
-            $redisPool = new RedisPool((new RedisConfig)
+            $redisPool = new RedisCachePool((new RedisConfig)
                     ->withHost($redisConfig['host'])
                     ->withPort($redisConfig['port'])
                     ->withAuth($redisConfig['auth'])
                     ->withDbIndex($redisConfig['dbIndex'])
                     ->withTimeout($redisConfig['timeout'])
             );
+            if (isset($redisConfig['poolWaitSeconds'])) {
+                $redisPool->withWaitTimeout((float) $redisConfig['poolWaitSeconds']);
+            }
             $serviceProvider->setSingleton(RedisPool::class, $redisPool);
             $serviceProvider->addScoped(RedisCache::class);
             $serviceProvider->addScoped(RedisConnector::class);
@@ -149,6 +158,9 @@ class BaseStartUp implements IStartUp
         if (isset($this->config->values['clickhouse'])) {
             $chConfig = $this->config->values['clickhouse'];
             $chPool = new ClickHouseHttpPool($this->config, $chConfig['poolSize'] ?? ClickHouseHttpPool::DEFAULT_SIZE);
+            if (isset($chConfig['poolWaitSeconds'])) {
+                $chPool->withWaitTimeout((float) $chConfig['poolWaitSeconds']);
+            }
             $serviceProvider->setSingleton(IClickHousePool::class, $chPool);
             $serviceProvider->addScoped(IClickHouseConnector::class, ClickHouseConnector::class);
             $serviceProvider->addScoped(ClickHouseContext::class);

@@ -10,6 +10,7 @@ use Swoole\Coroutine\PostgreSQL;
 class PostgreSQLPool extends PostgreSqlConnectionPool implements IPostgresqlPool
 {
     use ReleasesPoolSlots;
+    use WaitsForConnection;
 
     public function __construct(private Config $config, int $size = self::DEFAULT_SIZE)
     {

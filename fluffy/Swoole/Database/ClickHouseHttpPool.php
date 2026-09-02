@@ -12,6 +12,8 @@ use Swoole\Coroutine\Http\Client;
  */
 class ClickHouseHttpPool extends ClickHouseConnectionPool implements IClickHousePool
 {
+    use WaitsForConnection;
+
     const DEFAULT_SIZE = 8;
 
     public function __construct(private Config $config, int $size = self::DEFAULT_SIZE)
