@@ -1,8 +1,29 @@
 # fluffy
 
-Fluffy framework. Based on Viewi and Swoole.
+An async PHP application framework built on [Swoole](https://swoole.com) and
+[Viewi](https://viewi.net) — one language for the server and the browser, with no Node in the
+build.
 
-Not ready for production.
+## What it gives you
+
+- **Async HTTP server on Swoole** — long-lived worker processes with connection pooling, not a
+  per-request bootstrap.
+- **Viewi frontend** — components written in PHP, transpiled to JavaScript, server-side rendered
+  and hydrated in the browser.
+- **ORM** — entity + map classes, a fluent query builder, paginated search and merge/upsert, with
+  migrations and code generation (`php fluffy model create|build`).
+- **DI container**, routing, middleware pipeline, and a job/cron runner on Swoole's task pool.
+- **PostgreSQL, Redis and ClickHouse** integrations, with pooled connections for each.
+
+## Status
+
+Used in production: it runs [urlicer.com](https://urlicer.com) — link shortening, redirects,
+click analytics on ClickHouse, and per-SNI TLS for customer domains.
+
+It is, however, a one-developer framework built alongside the application that uses it. Public APIs
+still change between versions, the documentation below is a command reference rather than a guide,
+and there is no deprecation policy yet. Read it as "production-proven on one product," not
+"production-ready for yours."
 
 ## Commands
 
