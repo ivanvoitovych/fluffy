@@ -79,8 +79,8 @@ class RoutingMiddleware implements IMiddleware
             $request = $this->httpContext->request;
             $referer = $request->headers['referer'] ?? '';
             $agent = $request->headers['user-agent'] ?? '';
+            // No client IP in the line: we do not log IP addresses anywhere.
             echo '[Router] 404 ' . $targetMethod . ':' . $this->logSafe($request->uri)
-                . ' ip=' . $this->logSafe($request->getIp(), 45)
                 . ($referer !== '' ? ' ref=' . $this->logSafe($referer) : '')
                 . ($agent !== '' ? ' ua=' . $this->logSafe($agent) : '')
                 . PHP_EOL;

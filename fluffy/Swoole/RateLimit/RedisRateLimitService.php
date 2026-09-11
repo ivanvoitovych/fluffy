@@ -8,9 +8,19 @@ class RedisRateLimitService implements IRateLimitService
 {
     public function __construct(private RedisConnector $redisConnector) {}
 
+    /**
+     * Callers key buckets by client IP ("unlock:1.2.3.4"). The key is hashed before it reaches
+     * Redis so no IP address is ever stored there, not even for the bucket's lifetime. Every method
+     * goes through here, so limit/peek/reset keep addressing the same bucket.
+     */
+    private function redisKey(string $key): string
+    {
+        return 'RL:' . hash('sha256', $key);
+    }
+
     public function limit(string $key, int $max, int $lifetime): bool
     {
-        $redisKey = "RL:$key";
+        $redisKey = $this->redisKey($key);
         $redis = $this->redisConnector->get();
         $final = $redis->incr($redisKey); // to test overflow , 9223372036854775807
         // print_r([$key, $final]);
